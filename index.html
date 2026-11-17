@@ -25,7 +25,7 @@
   body { font: 13px/1.45 var(--mono); }
   video, canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
   #fx { z-index: 2; pointer-events: none; }   /* moths and light draw above the title; drags fall through to the scene */
-  .log, .controls { z-index: 3; }
+  .log, .controls, .count { z-index: 3; }
   video { object-fit: cover; transform: scaleX(-1); filter: grayscale(.75) contrast(1.05); }
   canvas { touch-action: none; cursor: crosshair; }
   .hud { position: fixed; pointer-events: none; display: flex; flex-direction: column; gap: 4px; }
@@ -90,11 +90,19 @@
   body.live .blurb { position: static; transform: none; }
   body.live .how { display: block; position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); top: calc(max(14px, env(safe-area-inset-top, 0px)) + 66px); text-align: left; }
   body.live #camera { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); top: max(20px, env(safe-area-inset-top, 0px)); }
+  /* Status and moth count, centered at the top in the same light sans as the intro. */
   .log {
-    bottom: max(20px, env(safe-area-inset-bottom, 0px));
-    left: max(20px, env(safe-area-inset-left, 0px));
+    top: max(20px, env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: max(16rem, calc(100vw - 640px));
+    align-items: center;
+    text-align: center;
+    font: 300 15px/1.35 var(--text);
+    color: var(--paper-dim);
     font-variant-numeric: tabular-nums;
-    max-width: calc(100vw - 340px);
+    text-shadow: 0 0 6px #000, 0 0 12px #000, 0 0 18px #000;   /* the swirl fades out behind the words */
   }
   .log b { font-weight: 400; color: var(--lamp); }
   #camera {
@@ -126,7 +134,16 @@
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
-  .count { display: flex; align-items: center; gap: 10px; color: var(--paper-dim); }
+  /* The moth slider sits on its own in the bottom-left corner. */
+  .count {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left, 0px));
+    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--paper-dim);
+  }
   .count input { width: 150px; accent-color: var(--lamp); cursor: pointer; }
   .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
   .count output { min-width: 2ch; color: var(--paper); font-variant-numeric: tabular-nums; text-align: right; }
@@ -165,10 +182,12 @@
   }
   @media (prefers-reduced-motion: reduce) { .finger input { animation: none; } }
   @media (max-width: 640px) {
-    .controls { right: auto; left: max(20px, env(safe-area-inset-left, 0px)); bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 92px); align-items: flex-start; }
-    .controls { flex-direction: row; align-items: flex-end; }   /* slider beside the hand, so the pair stays short */
+    /* Phones: the top corners hold the title and button once the camera is on, so the status
+       moves to the bottom center, with the slider and hand just above it. */
+    .log { top: auto; bottom: max(20px, env(safe-area-inset-bottom, 0px)); max-width: calc(100vw - 40px); }
+    .count { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 84px); }
+    .controls { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 84px); }
     .count input { width: 100px; }
-    .log { max-width: calc(100vw - 40px); }
   }
   @media (max-width: 480px) {
     body.live .title { font-size: 48px; }
@@ -196,8 +215,8 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> moths at the lamp</span>
 </div>
-<div class="controls">
 <label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
+<div class="controls">
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="99 29 423 517" aria-hidden="true">
     <defs>

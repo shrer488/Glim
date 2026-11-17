@@ -27,7 +27,7 @@ No camera? Press and drag anywhere on the page to pull out a beam with your mous
 
 - Moths appear as photo negatives in the dark and turn into their true colors as they get close to the light.
 - They fly in front of you and behind you, hidden by your body when they pass behind.
-- The **Moths** slider sets how many there are, from 1 to 30. More moths means smaller moths.
+- The **Moths** slider in the bottom-left corner sets how many there are, from 1 to 30. More moths means smaller moths.
 - The colored dots on the little hand in the corner set each finger's beam color. Click one to change it.
 
 Everything runs in your browser. Video from your camera is never uploaded anywhere.
