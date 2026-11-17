@@ -124,56 +124,43 @@
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
-  /* The moth slider sits on its own in the bottom-left corner: a hair-thin line with a small
-     hollow cream ring as the handle, and the moth icon riding above the handle. */
+  /* The moth slider sits on its own in the bottom-left corner: a hair-thin cream arc with a small
+     hollow ring as the handle, and the moth icon riding above the handle. The arc is drawn; a real
+     range input lies invisibly over it, so dragging, tapping, keys and screen readers all still work. */
   .count {
     position: fixed;
     left: max(20px, env(safe-area-inset-left, 0px));
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    display: block;
     font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .count-tag { display: flex; will-change: transform; }
+  .arc { position: relative; display: block; width: 160px; height: 34px; margin-top: 38px; }
+  .arc svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .arc-line { fill: none; stroke: var(--paper-dim); stroke-width: 1; }
+  .arc-thumb { fill: #000; stroke: var(--paper); stroke-width: 1.5; }   /* hollow: only the cream ring reads */
+  .arc:has(input:focus-visible) .arc-thumb { stroke-width: 2.5; }
+  .arc input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  /* The invisible native handle matches the drawn one's width, so a click lands on the value under the pointer. */
+  .arc input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 34px; }
+  .arc input::-moz-range-thumb { width: 13px; height: 34px; border: 0; }
+  .count-tag { position: absolute; left: 0; top: 0; display: flex; will-change: transform; }
   .count .moth-icon { display: block; width: 42px; height: 30px; }
   .count .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
   /* The moth icon glows like the hand: cream, brightest at the top, with a soft halo. */
   .moth-icon .shape { fill: url(#moth-fade); }
   .moth-icon .halo { fill: url(#moth-fade); filter: url(#moth-blur); opacity: 0.7; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .count input {
-    width: 160px;
-    height: 16px;
-    margin: 0;
-    background: none;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .count input:focus-visible { outline: 1px solid var(--paper-dim); outline-offset: 6px; }
-  .count input::-webkit-slider-runnable-track { height: 1px; background: var(--paper-dim); }
-  .count input::-moz-range-track { height: 1px; background: var(--paper-dim); }
-  .count input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: 13px;
-    height: 13px;
-    margin-top: -6px;
-    border: 1.5px solid var(--paper);
-    border-radius: 50%;
-    background: #000;   /* hollow: the background shows through, so only the cream ring reads */
-  }
-  .count input::-moz-range-thumb {
-    box-sizing: border-box;
-    width: 13px;
-    height: 13px;
-    border: 1.5px solid var(--paper);
-    border-radius: 50%;
-    background: #000;
-  }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
   .finger[data-tip="8"]  { left: 27.8%; top: 6.8%; }
   .finger[data-tip="12"] { left: 55.4%; top: 6.8%; }
@@ -214,7 +201,7 @@
     .log { top: auto; bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px); max-width: calc(100vw - 40px); }
     .count { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
     .controls { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
-    .count input { width: 100px; }
+    .arc { width: 110px; }
   }
   @media (max-width: 480px) {
     body.live .title { font-size: 48px; }
@@ -239,7 +226,7 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> <span id="moth-word">moths</span> at the lamp</span>
 </div>
-<label class="count"><span class="sr-only">Moths</span><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
+<label class="count"><span class="sr-only">Moths</span><span class="arc"><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
     <defs>
       <linearGradient id="moth-fade" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="641">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
@@ -251,7 +238,7 @@
     </defs>
     <use class="halo" href="#moth-shape"/>
     <use class="shape" href="#moth-shape"/>
-  </svg></span></span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"></label>
+  </svg></span></span><svg aria-hidden="true"><path class="arc-line"/><circle class="arc-thumb" r="6"/></svg><input type="range" id="moth-count" min="1" max="30" step="1" value="4"></span></label>
 <div class="controls">
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="99 29 423 517" aria-hidden="true">
@@ -397,13 +384,27 @@ const countInput = document.getElementById("moth-count");
 const countTag = document.querySelector(".count-tag");
 const THUMB = 13;   // the handle's width, as set in the styles
 
-// Keeps the moth icon centered over the slider handle, stopping at the ends of the line.
+const arcBox = document.querySelector(".arc");
+const arcSvg = arcBox.querySelector("svg");
+const arcLine = arcBox.querySelector(".arc-line");
+const arcThumb = arcBox.querySelector(".arc-thumb");
+const ARC_H = 34, ARC_BASE = 28, ARC_LIFT = 32;   // the curve rises about 16 px in the middle
+
+// Draws the arc to the slider's width and puts the ring and moth where the value sits on it.
+// The curve's ends sit half a handle in from each side, matching where the invisible slider
+// puts its own handle, so the pointer and the drawn ring always line up.
 function placeCountTag() {
-  const track = countInput.getBoundingClientRect().width;
+  const w = arcBox.getBoundingClientRect().width;
+  const x0 = THUMB / 2, x1 = w - THUMB / 2, cy = ARC_BASE - ARC_LIFT;
+  arcSvg.setAttribute("viewBox", `0 0 ${w} ${ARC_H}`);
+  arcLine.setAttribute("d", `M${x0} ${ARC_BASE} Q${w / 2} ${cy} ${x1} ${ARC_BASE}`);
   const t = (mothCount - MOTH_MIN) / (MOTH_MAX - MOTH_MIN);
-  const handle = THUMB / 2 + t * (track - THUMB);
-  const w = countTag.getBoundingClientRect().width;
-  countTag.style.transform = `translateX(${clamp(handle - w / 2, 0, Math.max(0, track - w))}px)`;
+  const x = x0 + (x1 - x0) * t;
+  const y = (1 - t) ** 2 * ARC_BASE + 2 * (1 - t) * t * cy + t * t * ARC_BASE;
+  arcThumb.setAttribute("cx", x);
+  arcThumb.setAttribute("cy", y);
+  const tag = countTag.getBoundingClientRect();
+  countTag.style.transform = `translate(${clamp(x - tag.width / 2, 0, Math.max(0, w - tag.width))}px, ${y - tag.height - 8}px)`;
 }
 addEventListener("resize", placeCountTag);
 document.fonts?.ready.then(placeCountTag);
