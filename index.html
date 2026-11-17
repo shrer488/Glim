@@ -547,7 +547,7 @@ function scatter(p) {
 /* ---------- Strings of light ---------- */
 
 const ROPE_POINTS = 18;
-const GRAVITY = 600;        // px per second squared; light, so a taut band barely droops
+const GRAVITY = 350;        // px per second squared; light, so a taut band barely droops
 const ROPE_DAMPING = 0.992; // little friction, so a band keeps wobbling for a moment after a jolt
 const STIFFNESS = 0.3;      // how hard each piece pulls back toward its natural length
 const STIFF_PASSES = 6;
@@ -556,7 +556,7 @@ const STIFF_PASSES = 6;
 // so it is always under some tension: it stretches as the fingers pull apart and contracts as they close.
 function makeRope(a, b, restFactor) {
   const gap = Math.hypot(b.x - a.x, b.y - a.y);
-  const rest = Math.max(gap * restFactor, Math.min(W, H) * 0.12);
+  const rest = Math.max(gap * restFactor, Math.min(W, H) * 0.08);
   const pts = Array.from({ length: ROPE_POINTS }, (_, i) => {
     const t = i / (ROPE_POINTS - 1);
     const x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
@@ -567,6 +567,10 @@ function makeRope(a, b, restFactor) {
 
 function stepRope(rope, a, b, dt) {
   const n = ROPE_POINTS, pts = rope.pts;
+  // When the fingers close in, a slack band slowly draws itself in, so it only droops briefly.
+  const gap = Math.hypot(b.x - a.x, b.y - a.y);
+  const snug = Math.max(gap * 1.05, Math.min(W, H) * 0.08);
+  if (rope.rest > snug) rope.rest += (snug - rope.rest) * clamp(dt * 0.9, 0, 1);
   const seg = rope.rest / (n - 1);
   const steps = 2, h = dt / steps;
   for (let s = 0; s < steps; s++) {
@@ -642,7 +646,7 @@ function updatePresses(now, dt) {
     p.lamp += (goal - p.lamp) * clamp(dt * 10, 0, 1);
 
     if (p.lit || p.lamp >= 0.01) {
-      p.rope ??= makeRope(p.a, p.b, 0.85);
+      p.rope ??= makeRope(p.a, p.b, 0.8);
       stepRope(p.rope, p.a, p.b, dt);
       // The light, and so the moths, centre on the lowest part of the string.
       const m = ropeMid(p.rope);
