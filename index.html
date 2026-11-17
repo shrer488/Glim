@@ -91,23 +91,28 @@
     text-shadow: 0 0 6px #000, 0 0 12px #000, 0 0 18px #000;   /* keeps the words readable when a moth passes behind */
   }
   .log b { font-weight: 400; color: var(--lamp); }
-  /* The camera button sits at the bottom center in every view, cream like the title. */
+  /* The camera button sits at the bottom center in every view. Like the hand and moth icons it is a
+     soft cream glow, brightest at the top and fading a little toward the bottom, with a halo. */
   #camera {
     position: absolute;
     left: 50%;
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     pointer-events: auto;
-    padding: 10px 18px;
+    padding: 11px 26px;
     border: 0;
-    border-radius: 2px;
-    background: var(--paper);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.72) 70%, rgba(239, 231, 214, 0.55));
+    box-shadow: 0 0 14px 2px rgba(239, 231, 214, 0.3);
     color: #17140f;
-    font: inherit;
+    font: 400 14px/1 var(--text);
+    letter-spacing: 0.01em;
     cursor: pointer;
+    transition: box-shadow 0.2s ease;
   }
+  #camera:hover { box-shadow: 0 0 22px 5px rgba(239, 231, 214, 0.42); }
   #camera[disabled] { opacity: .6; cursor: progress; }
-  #camera:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+  #camera:focus-visible { outline: 1.5px solid var(--paper); outline-offset: 4px; }
   .controls {
     position: fixed;
     right: max(20px, env(safe-area-inset-right, 0px));
