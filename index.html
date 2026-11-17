@@ -115,9 +115,9 @@
     align-items: flex-end;
     gap: 14px;
   }
-  /* The finger colors sit on a small hand outline, one circle above each fingertip.
-     Positions are in the hand drawing's own units (viewBox 0 -16 96 146), as percentages. */
-  .picker { position: relative; width: 64px; height: 97px; }
+  /* The finger colors sit on a small hand, one dot above each fingertip.
+     The hand is traced from a reference illustration; dot positions are percentages of its drawing. */
+  .picker { position: relative; width: 66px; height: 79px; }
   .picker svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
@@ -127,10 +127,10 @@
   .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
   .count output { min-width: 2ch; color: var(--paper); font-variant-numeric: tabular-nums; text-align: right; }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
-  .finger[data-tip="8"]  { left: calc(22.3 / 96 * 100%); top: calc((10.6 + 16) / 146 * 100%); }
-  .finger[data-tip="12"] { left: calc(43.1 / 96 * 100%); top: calc((-0.7 + 16) / 146 * 100%); }
-  .finger[data-tip="16"] { left: calc(65.8 / 96 * 100%); top: calc((6 + 16) / 146 * 100%); }
-  .finger[data-tip="20"] { left: calc(82.3 / 96 * 100%); top: calc((21.8 + 16) / 146 * 100%); }
+  .finger[data-tip="8"]  { left: 30.6%; top: 5.1%; }
+  .finger[data-tip="12"] { left: 59.2%; top: 5.1%; }
+  .finger[data-tip="16"] { left: 79.8%; top: 13.7%; }
+  .finger[data-tip="20"] { left: 93.5%; top: 29.1%; }
   .finger input {
     width: 11px;
     height: 11px;
@@ -184,16 +184,16 @@
 <div class="controls">
 <label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
 <div class="picker" role="group" aria-label="Beam color for each finger">
-  <svg viewBox="0 -16 96 146" aria-hidden="true">
+  <svg viewBox="96 70 400 476" aria-hidden="true">
     <defs>
-      <linearGradient id="hand-fade" gradientUnits="userSpaceOnUse" x1="0" y1="12" x2="0" y2="127">
+      <linearGradient id="hand-fade" gradientUnits="userSpaceOnUse" x1="0" y1="121" x2="0" y2="544">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
         <stop offset="0.35" style="stop-color: var(--paper); stop-opacity: 0.7"/>
         <stop offset="0.75" style="stop-color: var(--paper); stop-opacity: 0.18"/>
         <stop offset="1" style="stop-color: var(--paper); stop-opacity: 0"/>
       </linearGradient>
-      <filter id="hand-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>
-      <path id="hand-shape" d="M31 80 C31 62 73 62 73 80 L70 106 C68 116 66 122 66 131 L40 131 C40 122 36 116 34 106 Z M41.9 73.0 L22.5 24.8 A5.2 5.2 0 0 1 32.1 20.9 L51.6 69.1 Z M45.4 70.6 L39.3 12.9 A5.2 5.2 0 0 1 49.6 11.9 L55.7 69.5 Z M49.3 69.3 L58.3 18.1 A5.2 5.2 0 0 1 68.6 19.9 L59.6 71.1 Z M53.5 69.1 L71.9 31.4 A5.2 5.2 0 0 1 81.2 35.9 L62.8 73.7 Z M34.1 97.7 L9.4 89.7 A6 6 0 0 1 13.1 78.3 L37.9 86.3 Z"/>
+      <filter id="hand-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+      <path id="hand-shape" d="M336.5 123.5 Q332.0 121.0 326.0 121.5 Q320.0 122.0 317.0 125.0 Q314.0 128.0 312.5 132.0 Q311.0 136.0 301.5 186.0 Q292.0 236.0 291.0 255.0 Q290.0 274.0 288.5 279.0 Q287.0 284.0 285.5 285.5 Q284.0 287.0 280.5 287.0 Q277.0 287.0 275.5 286.0 Q274.0 285.0 270.5 277.0 Q267.0 269.0 252.5 205.5 Q238.0 142.0 235.0 136.5 Q232.0 131.0 229.5 129.0 Q227.0 127.0 223.5 127.0 Q220.0 127.0 218.0 128.0 Q216.0 129.0 213.5 132.5 Q211.0 136.0 210.0 141.5 Q209.0 147.0 209.5 159.0 Q210.0 171.0 214.0 203.5 Q218.0 236.0 223.0 263.0 Q228.0 290.0 229.0 308.0 Q230.0 326.0 226.5 338.5 Q223.0 351.0 218.5 359.5 Q214.0 368.0 210.0 373.0 Q206.0 378.0 201.0 377.0 Q196.0 376.0 190.0 370.0 Q184.0 364.0 173.5 346.5 Q163.0 329.0 157.5 321.5 Q152.0 314.0 147.0 309.5 Q142.0 305.0 135.0 301.0 Q128.0 297.0 122.5 295.5 Q117.0 294.0 113.0 294.5 Q109.0 295.0 105.0 298.5 Q101.0 302.0 102.0 306.0 Q103.0 310.0 111.0 320.5 Q119.0 331.0 125.0 344.5 Q131.0 358.0 140.0 373.5 Q149.0 389.0 152.0 400.5 Q155.0 412.0 158.5 419.0 Q162.0 426.0 168.0 433.5 Q174.0 441.0 193.0 460.0 Q212.0 479.0 219.5 489.5 Q227.0 500.0 231.5 509.5 Q236.0 519.0 237.0 529.0 Q238.0 539.0 264.5 541.0 Q291.0 543.0 310.0 543.0 Q329.0 543.0 343.0 541.5 Q357.0 540.0 358.5 519.5 Q360.0 499.0 370.0 473.5 Q380.0 448.0 383.5 424.5 Q387.0 401.0 391.5 385.5 Q396.0 370.0 407.0 347.5 Q418.0 325.0 429.0 306.0 Q440.0 287.0 449.0 266.5 Q458.0 246.0 458.5 240.0 Q459.0 234.0 458.0 231.5 Q457.0 229.0 454.5 227.5 Q452.0 226.0 446.5 227.5 Q441.0 229.0 434.5 236.0 Q428.0 243.0 420.5 258.0 Q413.0 273.0 399.0 294.0 Q385.0 315.0 381.5 319.0 Q378.0 323.0 374.5 322.5 Q371.0 322.0 372.0 313.0 Q373.0 304.0 380.5 280.5 Q388.0 257.0 390.0 244.5 Q392.0 232.0 399.5 205.5 Q407.0 179.0 406.5 170.5 Q406.0 162.0 403.5 160.5 Q401.0 159.0 395.5 159.0 Q390.0 159.0 387.0 161.0 Q384.0 163.0 381.5 167.0 Q379.0 171.0 375.5 182.0 Q372.0 193.0 365.5 208.0 Q359.0 223.0 350.5 250.0 Q342.0 277.0 338.5 283.5 Q335.0 290.0 331.5 290.5 Q328.0 291.0 328.0 280.0 Q328.0 269.0 330.0 259.0 Q332.0 249.0 334.5 218.0 Q337.0 187.0 340.5 164.5 Q344.0 142.0 344.0 138.0 Q344.0 134.0 342.5 130.0 Q341.0 126.0 336.5 123.5 Z"/>
     </defs>
     <use class="halo" href="#hand-shape"/>
     <use class="hand" href="#hand-shape"/>
