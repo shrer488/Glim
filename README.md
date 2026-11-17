@@ -1,4 +1,4 @@
-# Moth Lamp
+# Glim
 
 **Open it here: https://shrer488.github.io/Moth/**
 
