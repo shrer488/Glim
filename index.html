@@ -124,19 +124,52 @@
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
-  /* The moth slider sits on its own in the bottom-left corner. */
+  /* The moth slider sits on its own in the bottom-left corner: "Moths" and the count on top, a
+     hair-thin line below, and a small handle with the same soft cream glow as the hand. */
   .count {
     position: fixed;
     left: max(20px, env(safe-area-inset-left, 0px));
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 10px;
+    font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .count input { width: 150px; accent-color: var(--lamp); cursor: pointer; }
-  .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
-  .count output { min-width: 2ch; color: var(--paper); font-variant-numeric: tabular-nums; text-align: right; }
+  .count span { grid-row: 1; grid-column: 1; }
+  .count output { grid-row: 1; grid-column: 2; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .count input { grid-row: 2; }
+  .count input {
+    grid-column: 1 / -1;
+    width: 160px;
+    height: 16px;
+    margin: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .count input:focus-visible { outline: 1px solid var(--paper-dim); outline-offset: 6px; }
+  .count input::-webkit-slider-runnable-track { height: 1px; background: var(--paper-dim); }
+  .count input::-moz-range-track { height: 1px; background: var(--paper-dim); }
+  .count input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    margin-top: -6px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.65) 55%, rgba(239, 231, 214, 0.25));
+    box-shadow: 0 0 8px 2px rgba(239, 231, 214, 0.35);
+  }
+  .count input::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.65) 55%, rgba(239, 231, 214, 0.25));
+    box-shadow: 0 0 8px 2px rgba(239, 231, 214, 0.35);
+  }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
   .finger[data-tip="8"]  { left: 27.8%; top: 6.8%; }
   .finger[data-tip="12"] { left: 55.4%; top: 6.8%; }
