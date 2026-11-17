@@ -132,11 +132,17 @@
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
     display: grid;
     grid-template-columns: 1fr auto;
+    align-items: center;
     row-gap: 10px;
     font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .count span { grid-row: 1; grid-column: 1; }
+  .count .moth-icon { grid-row: 1; grid-column: 1; display: block; width: 28px; height: 20px; }
+  .count .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  /* The moth icon glows like the hand: cream, brightest at the top, with a soft halo. */
+  .moth-icon .shape { fill: url(#moth-fade); }
+  .moth-icon .halo { fill: url(#moth-fade); filter: url(#moth-blur); opacity: 0.7; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .count output { grid-row: 1; grid-column: 2; color: var(--paper); font-variant-numeric: tabular-nums; }
   .count input { grid-row: 2; }
   .count input {
@@ -235,7 +241,19 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> <span id="moth-word">moths</span> at the lamp</span>
 </div>
-<label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
+<label class="count"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
+    <defs>
+      <linearGradient id="moth-fade" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="641">
+        <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
+        <stop offset="0.6" style="stop-color: var(--paper); stop-opacity: 0.6"/>
+        <stop offset="1" style="stop-color: var(--paper); stop-opacity: 0.3"/>
+      </linearGradient>
+      <filter id="moth-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="28"/></filter>
+      <path id="moth-shape" d="M58 35 Q47 37 43 48 Q39 59 32 67 Q26 75 20 114 Q13 153 12 168 Q12 184 14 188 Q17 192 17 200 Q17 208 22 221 Q28 234 30 244 Q31 253 43 267 Q55 281 56 286 Q58 290 70 300 Q82 310 88 312 Q94 313 95 315 Q96 317 126 322 Q155 326 154 330 Q154 335 145 337 Q136 339 128 344 Q121 348 118 355 Q116 362 106 372 Q97 383 95 394 Q93 405 96 412 Q100 420 104 424 Q108 427 110 434 Q111 442 116 448 Q120 454 122 454 Q125 454 132 460 Q138 465 140 472 Q142 479 149 488 Q156 496 169 499 Q182 502 182 508 Q183 513 188 513 Q194 513 194 516 Q195 520 200 524 Q205 527 218 529 Q230 531 244 530 Q259 529 260 531 Q261 533 266 533 Q271 533 283 538 Q295 544 311 542 Q327 539 328 542 Q329 545 331 545 Q333 545 345 531 Q357 517 366 483 Q376 449 380 447 Q385 445 386 438 Q386 430 390 430 Q395 429 396 432 Q398 435 404 438 Q410 442 413 450 Q416 458 416 476 Q416 495 422 510 Q428 525 432 548 Q437 571 440 576 Q444 581 444 586 Q445 590 449 593 Q453 596 458 608 Q462 620 462 628 Q463 636 473 633 Q483 630 486 611 Q489 592 495 574 Q501 555 502 538 Q504 520 510 512 Q516 503 515 497 Q514 491 508 482 Q503 472 506 452 Q509 431 513 431 Q517 431 520 436 Q523 441 526 442 Q529 443 529 446 Q529 449 532 450 Q535 451 535 454 Q535 458 540 462 Q545 467 548 478 Q550 489 558 501 Q565 513 570 514 Q575 514 580 520 Q584 525 592 529 Q599 533 603 531 Q607 529 616 529 Q625 529 640 532 Q656 535 656 532 Q657 529 680 524 Q703 519 704 516 Q704 514 716 514 Q728 513 731 509 Q734 505 744 503 Q754 501 762 496 Q769 490 774 482 Q779 475 784 472 Q788 470 788 464 Q788 459 790 458 Q793 456 794 452 Q794 448 804 432 Q815 417 815 412 Q815 406 822 398 Q828 390 829 380 Q830 371 828 366 Q827 361 822 356 Q818 351 818 348 Q817 344 806 332 Q794 321 794 316 Q794 312 798 310 Q801 307 808 307 Q815 307 817 304 Q819 300 830 298 Q840 296 848 288 Q857 280 858 276 Q859 272 866 266 Q874 261 874 252 Q875 243 880 240 Q886 238 891 228 Q896 218 895 205 Q894 192 899 187 Q904 182 902 157 Q899 132 896 129 Q894 126 893 110 Q892 94 888 88 Q885 82 884 72 Q883 62 872 46 Q860 29 852 26 Q845 23 833 24 Q821 25 800 38 Q778 51 752 76 Q725 101 708 112 Q692 123 674 141 Q656 159 605 198 Q554 237 546 246 Q538 256 533 256 Q528 256 521 251 Q514 246 505 244 Q496 241 489 230 Q482 220 482 212 Q482 204 490 172 Q497 141 510 114 Q522 88 527 70 Q532 53 533 36 Q534 19 531 13 Q528 7 526 7 Q523 7 524 16 Q526 24 525 40 Q524 55 509 92 Q494 128 484 165 Q475 202 461 200 Q447 197 440 203 Q432 209 428 208 Q423 208 400 170 Q376 133 376 128 Q375 122 350 82 Q324 41 322 41 Q319 41 322 51 Q326 61 335 76 Q344 91 348 94 Q352 98 366 126 Q379 154 398 184 Q416 213 417 222 Q418 232 416 237 Q414 242 403 250 Q392 259 386 260 Q379 261 355 240 Q331 219 284 188 Q236 156 166 98 Q97 41 82 37 Q68 33 58 35 Z"/>
+    </defs>
+    <use class="halo" href="#moth-shape"/>
+    <use class="shape" href="#moth-shape"/>
+  </svg></span><span class="sr-only">Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
 <div class="controls">
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="99 29 423 517" aria-hidden="true">
