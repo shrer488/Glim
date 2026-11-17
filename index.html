@@ -125,7 +125,7 @@
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
   /* The moth slider sits on its own in the bottom-left corner: a hair-thin line with a small
-     hollow cream ring as the handle, and the count and moth icon riding above the handle. */
+     hollow cream ring as the handle, and the moth icon riding above the handle. */
   .count {
     position: fixed;
     left: max(20px, env(safe-area-inset-left, 0px));
@@ -137,14 +137,13 @@
     font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .count-tag { display: flex; align-items: center; gap: 6px; will-change: transform; }
+  .count-tag { display: flex; will-change: transform; }
   .count .moth-icon { display: block; width: 42px; height: 30px; }
   .count .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
   /* The moth icon glows like the hand: cream, brightest at the top, with a soft halo. */
   .moth-icon .shape { fill: url(#moth-fade); }
   .moth-icon .halo { fill: url(#moth-fade); filter: url(#moth-blur); opacity: 0.7; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .count output { font-size: 20px; color: var(--paper); font-variant-numeric: tabular-nums; }
   .count input {
     width: 160px;
     height: 16px;
@@ -240,7 +239,7 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> <span id="moth-word">moths</span> at the lamp</span>
 </div>
-<label class="count"><span class="sr-only">Moths</span><span class="count-tag"><output id="moth-count-value" for="moth-count">4</output><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
+<label class="count"><span class="sr-only">Moths</span><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
     <defs>
       <linearGradient id="moth-fade" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="641">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
@@ -395,11 +394,10 @@ function makeMoth(id, fromEdge) {
 const moths = Array.from({ length: mothCount }, (_, i) => makeMoth(i, false));
 
 const countInput = document.getElementById("moth-count");
-const countOutput = document.getElementById("moth-count-value");
 const countTag = document.querySelector(".count-tag");
 const THUMB = 13;   // the handle's width, as set in the styles
 
-// Keeps the count and icon centered over the slider handle, stopping at the ends of the line.
+// Keeps the moth icon centered over the slider handle, stopping at the ends of the line.
 function placeCountTag() {
   const track = countInput.getBoundingClientRect().width;
   const t = (mothCount - MOTH_MIN) / (MOTH_MAX - MOTH_MIN);
@@ -416,7 +414,6 @@ function setMothCount(n) {
   for (let i = moths.length - 1; i >= 0; i--) if (moths[i].id >= mothCount) moths.splice(i, 1);
   for (const m of moths) m.targetSize = m.variety * countScale(mothCount);
   countInput.value = mothCount;
-  countOutput.textContent = mothCount;
   countInput.setAttribute("aria-valuetext", `${mothCount} moths`);
   document.getElementById("total").textContent = mothCount;
   placeCountTag();
