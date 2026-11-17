@@ -117,7 +117,7 @@
   }
   /* The finger colors sit on a small hand, one dot above each fingertip.
      The hand is traced from a reference illustration; dot positions are percentages of its drawing. */
-  .picker { position: relative; width: 66px; height: 79px; }
+  .picker { position: relative; width: 70px; height: 86px; }
   .picker svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
@@ -127,17 +127,19 @@
   .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
   .count output { min-width: 2ch; color: var(--paper); font-variant-numeric: tabular-nums; text-align: right; }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
-  .finger[data-tip="8"]  { left: 30.6%; top: 5.1%; }
-  .finger[data-tip="12"] { left: 59.2%; top: 5.1%; }
-  .finger[data-tip="16"] { left: 79.8%; top: 13.7%; }
-  .finger[data-tip="20"] { left: 93.5%; top: 29.1%; }
+  .finger[data-tip="8"]  { left: 27.8%; top: 6.8%; }
+  .finger[data-tip="12"] { left: 55.4%; top: 6.8%; }
+  .finger[data-tip="16"] { left: 78.3%; top: 15.6%; }
+  .finger[data-tip="20"] { left: 91.5%; top: 29.8%; }
   .finger input {
-    width: 11px;
+    width: 12px;
     height: 11px;
     box-shadow: 0 0 9px 1px var(--c, transparent);   /* each dot glows in its own color */
     padding: 0;
-    border: 1px solid var(--paper-dim);
-    border-radius: 50%;
+    border: 0;
+    /* Soft, slightly irregular blobs that slowly change shape, each finger out of step with the others. */
+    border-radius: 58% 42% 55% 45% / 45% 55% 42% 58%;
+    animation: blob 7s ease-in-out infinite alternate;
     background: none;
     cursor: pointer;
     appearance: none;
@@ -147,8 +149,17 @@
   .finger.active input { outline: 2px solid var(--paper); outline-offset: 2px; }
   .finger input:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
   .finger input::-webkit-color-swatch-wrapper { padding: 0; }
-  .finger input::-webkit-color-swatch { border: 0; border-radius: 50%; }
-  .finger input::-moz-color-swatch { border: 0; border-radius: 50%; }
+  .finger input::-webkit-color-swatch { border: 0; border-radius: inherit; }
+  .finger input::-moz-color-swatch { border: 0; border-radius: inherit; }
+  .finger[data-tip="12"] input { animation-delay: -2.1s; animation-duration: 8s; }
+  .finger[data-tip="16"] input { animation-delay: -4.3s; animation-duration: 6.5s; }
+  .finger[data-tip="20"] input { animation-delay: -1.2s; animation-duration: 7.5s; }
+  @keyframes blob {
+    0%   { border-radius: 58% 42% 55% 45% / 45% 55% 42% 58%; transform: rotate(0deg); }
+    50%  { border-radius: 42% 58% 46% 54% / 58% 40% 60% 42%; transform: rotate(18deg); }
+    100% { border-radius: 52% 48% 38% 62% / 50% 62% 38% 50%; transform: rotate(-12deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .finger input { animation: none; } }
   @media (max-width: 640px) {
     .controls { right: auto; left: max(20px, env(safe-area-inset-left, 0px)); bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 92px); align-items: flex-start; }
     .controls { flex-direction: row; align-items: flex-end; }   /* slider beside the hand, so the pair stays short */
@@ -184,7 +195,7 @@
 <div class="controls">
 <label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
 <div class="picker" role="group" aria-label="Beam color for each finger">
-  <svg viewBox="96 70 400 476" aria-hidden="true">
+  <svg viewBox="99 29 423 517" aria-hidden="true">
     <defs>
       <linearGradient id="hand-fade" gradientUnits="userSpaceOnUse" x1="0" y1="121" x2="0" y2="544">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
