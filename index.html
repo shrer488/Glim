@@ -25,12 +25,36 @@
   video { object-fit: cover; transform: scaleX(-1); filter: grayscale(.75) contrast(1.05); }
   canvas { touch-action: none; cursor: crosshair; }
   .hud { position: fixed; pointer-events: none; display: flex; flex-direction: column; gap: 4px; }
-  .name {
-    top: max(20px, env(safe-area-inset-top, 0px));
-    left: max(20px, env(safe-area-inset-left, 0px));
+  /* Camera off: the title, intro and button sit together in the middle of the screen.
+     Camera on (body.live): they split to the top corners, out of the way. */
+  .top {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;            /* the page behind still takes drags for the mouse beam */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px));
+    text-align: center;
   }
-  .name h1 { margin: 0; font: 300 34px/1.1 var(--display); letter-spacing: 0.01em; }
-  .name p { margin: 0; max-width: 34ch; color: var(--paper-dim); }
+  .name { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .name h1 { margin: 0; font: 300 clamp(44px, 8vw, 76px)/1.05 var(--display); letter-spacing: 0.01em; text-wrap: balance; }
+  .name p { margin: 0; max-width: 40ch; color: var(--paper-dim); text-wrap: balance; }
+  body.live .top {
+    inset: 0 0 auto 0;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: max(20px, env(safe-area-inset-top, 0px)) 0;
+    text-align: left;
+  }
+  body.live .name { align-items: flex-start; gap: 4px; }
+  body.live .name h1 { font-size: 34px; line-height: 1.1; }
+  body.live .name p { max-width: 34ch; }
   .log {
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
     left: max(20px, env(safe-area-inset-left, 0px));
@@ -39,9 +63,8 @@
   }
   .log b { font-weight: 400; color: var(--lamp); }
   #camera {
-    position: fixed;
-    top: max(20px, env(safe-area-inset-top, 0px));
-    right: max(20px, env(safe-area-inset-right, 0px));
+    flex: none;
+    pointer-events: auto;
     padding: 10px 16px;
     border: 0;
     border-radius: 2px;
@@ -98,7 +121,7 @@
     .log { max-width: calc(100vw - 40px); }
   }
   @media (max-width: 480px) {
-    .name h1 { font-size: 24px; }
+    body.live .name h1 { font-size: 24px; }
     .name p { max-width: 24ch; }
   }
 </style>
@@ -107,15 +130,17 @@
 <video id="video" playsinline muted hidden></video>
 <canvas id="scene"></canvas>
 
-<div class="hud name">
+<header class="top">
+<div class="name">
   <h1>Moth Lamp</h1>
   <p>Pinch your thumb with any finger, then pull apart. Each finger makes its own color. Touch fingertips from both hands to join beams into a rectangle. Make a fist to stop.</p>
 </div>
+<button id="camera" type="button">Start camera</button>
+</header>
 <div class="hud log">
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> moths at the lamp</span>
 </div>
-<button id="camera" type="button">Start camera</button>
 <div class="controls">
 <label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
 <div class="picker" role="group" aria-label="Beam color for each finger">
@@ -906,6 +931,7 @@ function stopCamera() {
   stream = null;
   video.srcObject = null;
   video.hidden = true;
+  document.body.classList.remove("live");
   cameraBtn.textContent = "Start camera";
   setStatus("Camera off. Press and drag anywhere to try it with your mouse.");
 }
@@ -936,6 +962,7 @@ cameraBtn.addEventListener("click", async () => {
     video.srcObject = stream;
     video.hidden = false;
     await video.play();
+    document.body.classList.add("live");
     cameraBtn.textContent = "Stop camera";
   } catch (err) {
     console.error(err);
