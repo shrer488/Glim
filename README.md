@@ -1,6 +1,6 @@
 # Glim
 
-**Open it here: https://shrer488.github.io/Moth/**
+**Open it here: https://shrer488.github.io/Glim/**
 
 A hand-tracking light toy for your webcam. Pinch your fingers, pull them apart, and a line of light appears in the gap. Moths fly in from the dark toward it.
 
