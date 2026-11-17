@@ -6,7 +6,7 @@
 <title>Glim</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mr+De+Haviland&family=Bricolage+Grotesque:opsz,wght@12..96,300&family=DM+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mr+De+Haviland&family=Bricolage+Grotesque:opsz,wght@12..96,300..600&family=DM+Mono:wght@400&display=swap">
 <style>
   /* Layout: one full-bleed night scene, with field-note labels pinned to the corners. */
   :root {
@@ -104,13 +104,21 @@
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.72) 70%, rgba(239, 231, 214, 0.55));
     box-shadow: 0 0 14px 2px rgba(239, 231, 214, 0.3);
-    color: #17140f;
-    font: 400 14px/1 var(--text);
+    color: #000;
+    font: 600 14px/1 var(--text);
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.35s ease;
   }
-  #camera:hover { box-shadow: 0 0 22px 5px rgba(239, 231, 214, 0.42); }
+  /* On hover the glow spreads wide. Several soft layers, each fading out completely, keep it a clean
+     light rather than a grey haze; the page also treats the hovered button as a light for the moths. */
+  #camera:hover, #camera:focus-visible {
+    box-shadow:
+      0 0 10px 2px rgba(255, 249, 236, 0.75),
+      0 0 34px 10px rgba(255, 246, 228, 0.32),
+      0 0 80px 30px rgba(255, 244, 222, 0.14),
+      0 0 150px 60px rgba(255, 242, 218, 0.06);
+  }
   #camera[disabled] { opacity: .6; cursor: progress; }
   #camera:focus-visible { outline: 1.5px solid var(--paper); outline-offset: 4px; }
   .controls {
@@ -295,6 +303,17 @@ const video = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const countEl = document.getElementById("count");
 const cameraBtn = document.getElementById("camera");
+
+// While the pointer (or keyboard focus) is on the camera button, it acts as a small light:
+// moths gather around it and show their true colors as they come close.
+let buttonLight = null;
+function lightButton() {
+  const r = cameraBtn.getBoundingClientRect();
+  buttonLight = { x: (r.left + r.right) / 2, y: r.top - 20, since: performance.now() };
+}
+cameraBtn.addEventListener("pointerenter", lightButton);
+cameraBtn.addEventListener("focus", () => { if (cameraBtn.matches(":focus-visible")) lightButton(); });
+for (const type of ["pointerleave", "blur"]) cameraBtn.addEventListener(type, () => { buttonLight = null; });
 
 let W = 0, H = 0;
 function resize() {
@@ -837,6 +856,7 @@ function step(dt, now) {
     else lights.push([p.a, p.b, p.lamp]);
   }
   if (link?.ropes) for (const rope of link.ropes) for (const [a, b] of ropePieces(rope)) lights.push([a, b, link.lamp]);
+  if (buttonLight) lights.push([buttonLight, buttonLight, 1]);
   const nearLight = Math.min(W, H) * 0.36;    // fully revealed inside this distance
   const farLight = Math.min(W, H) * 0.68;    // still a negative beyond this distance
 
@@ -846,6 +866,7 @@ function step(dt, now) {
     const c = linkCorners();
     lamps = [{ x: c.reduce((n, e) => n + e.x, 0) / 4, y: c.reduce((n, e) => n + e.y, 0) / 4, heldFor: Math.max(link.p.heldFor, link.q.heldFor) }];
   }
+  if (buttonLight) lamps.push({ x: buttonLight.x, y: buttonLight.y, heldFor: now - buttonLight.since });
   let gathered = 0;
 
   for (const m of moths) {
