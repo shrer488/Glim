@@ -117,9 +117,11 @@
   }
   /* The finger colors sit on a small hand outline, one circle above each fingertip.
      Positions are in the hand drawing's own units (viewBox 0 -16 96 146), as percentages. */
-  .picker { position: relative; width: 110px; height: 167px; }
+  .picker { position: relative; width: 80px; height: 122px; }
   .picker svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .picker path { fill: none; stroke: var(--paper); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
+  .picker .hand { fill: url(#hand-fade); }
+  .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
   .count { display: flex; align-items: center; gap: 10px; color: var(--paper-dim); }
   .count input { width: 150px; accent-color: var(--lamp); cursor: pointer; }
   .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
@@ -130,8 +132,9 @@
   .finger[data-tip="16"] { left: calc(70 / 96 * 100%); top: calc((3 + 16) / 146 * 100%); }
   .finger[data-tip="20"] { left: calc(88 / 96 * 100%); top: calc((19 + 16) / 146 * 100%); }
   .finger input {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
+    box-shadow: 0 0 9px 1px var(--c, transparent);   /* each dot glows in its own color */
     padding: 0;
     border: 1px solid var(--paper-dim);
     border-radius: 50%;
@@ -182,7 +185,18 @@
 <label class="count"><span>Moths</span><input type="range" id="moth-count" min="1" max="30" step="1" value="4"><output id="moth-count-value" for="moth-count">4</output></label>
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="0 -16 96 146" aria-hidden="true">
-    <path d="M44 127 C42 115 34 104 26 95 C20 88 12 78 7 70 C4 65 9 60 14 63 C20 67 25 74 31 80 L32 26 C32 15 42 15 42 26 L43 60 L46 20 C46 9 56 9 56 20 L56 60 L60 28 C61 18 71 19 70 29 L68 64 L74 42 C76 33 85 35 83 44 L78 78 C77 92 72 104 70 127"/>
+    <defs>
+      <linearGradient id="hand-fade" gradientUnits="userSpaceOnUse" x1="0" y1="12" x2="0" y2="127">
+        <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
+        <stop offset="0.35" style="stop-color: var(--paper); stop-opacity: 0.7"/>
+        <stop offset="0.75" style="stop-color: var(--paper); stop-opacity: 0.18"/>
+        <stop offset="1" style="stop-color: var(--paper); stop-opacity: 0"/>
+      </linearGradient>
+      <filter id="hand-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>
+      <path id="hand-shape" d="M44 127 C42 115 34 104 26 95 C20 88 12 78 7 70 C4 65 9 60 14 63 C20 67 25 74 31 80 L32 26 C32 15 42 15 42 26 L43 60 L46 20 C46 9 56 9 56 20 L56 60 L60 28 C61 18 71 19 70 29 L68 64 L74 42 C76 33 85 35 83 44 L78 78 C77 92 72 104 70 127 Z"/>
+    </defs>
+    <use class="halo" href="#hand-shape"/>
+    <use class="hand" href="#hand-shape"/>
   </svg>
   <label class="finger" data-tip="8" title="Index finger"><input type="color" id="color-8"></label>
   <label class="finger" data-tip="12" title="Middle finger"><input type="color" id="color-12"></label>
@@ -1039,9 +1053,11 @@ for (const tip of FINGERS) {
   const input = document.getElementById(`color-${tip}`);
   fingerLabels[tip] = input.parentElement;
   input.value = fingerColors[tip];
+  fingerLabels[tip].style.setProperty("--c", fingerColors[tip]);
   input.setAttribute("aria-label", `${FINGER_NAMES[tip]} finger beam color`);
   input.addEventListener("input", () => {
     fingerColors[tip] = input.value;
+    fingerLabels[tip].style.setProperty("--c", input.value);
     for (const p of presses.values()) if (p.finger === tip) p.color = input.value;
     if (tip === 8) setAccent();
     try { localStorage.setItem(FINGER_KEY, JSON.stringify(fingerColors)); } catch {}
