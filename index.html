@@ -124,8 +124,8 @@
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
-  /* The moth slider sits on its own in the bottom-left corner: a hair-thin cream arc with a small
-     hollow ring as the handle, and the moth icon riding above the handle. The arc is drawn; a real
+  /* The moth slider sits on its own in the bottom-left corner: a hair-thin cream line with a small
+     hollow ring as the handle, and the moth icon riding above the handle. The line is drawn; a real
      range input lies invisibly over it, so dragging, tapping, keys and screen readers all still work. */
   .count {
     position: fixed;
@@ -135,7 +135,7 @@
     font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .arc { position: relative; display: block; width: 160px; height: 50px; margin-top: 38px; }
+  .arc { position: relative; display: block; width: 160px; height: 22px; margin-top: 30px; }
   .arc > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }   /* the drawn arc only, not the moth icon inside the tag */
   .arc-line { fill: none; stroke: var(--paper-dim); stroke-width: 1; }
   .arc-thumb { fill: #000; stroke: var(--paper); stroke-width: 1.5; }   /* hollow: only the cream ring reads */
@@ -152,8 +152,8 @@
     appearance: none;
   }
   /* The invisible native handle matches the drawn one's width, so a click lands on the value under the pointer. */
-  .arc input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 50px; }
-  .arc input::-moz-range-thumb { width: 13px; height: 50px; border: 0; }
+  .arc input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 22px; }
+  .arc input::-moz-range-thumb { width: 13px; height: 22px; border: 0; }
   .count-tag { position: absolute; left: 0; top: 0; display: flex; will-change: transform; }
   .count .moth-icon { display: block; width: 42px; height: 30px; }
   .count .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -388,7 +388,7 @@ const arcBox = document.querySelector(".arc");
 const arcSvg = arcBox.querySelector(":scope > svg");
 const arcLine = arcBox.querySelector(".arc-line");
 const arcThumb = arcBox.querySelector(".arc-thumb");
-const ARC_H = 50, ARC_BASE = 44, ARC_LIFT = 64;   // the curve rises about 32 px in the middle
+const ARC_H = 22, ARC_BASE = 11, ARC_LIFT = 0;    // a straight line; raise ARC_LIFT to bow it into an arc
 
 // Draws the arc across the slider's full width and puts the ring and moth where the value sits on it.
 // The ring travels from half a handle in from each end, matching where the invisible slider puts its
