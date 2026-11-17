@@ -117,7 +117,7 @@
   }
   /* The finger colors sit on a small hand outline, one circle above each fingertip.
      Positions are in the hand drawing's own units (viewBox 0 -16 96 146), as percentages. */
-  .picker { position: relative; width: 80px; height: 122px; }
+  .picker { position: relative; width: 64px; height: 97px; }
   .picker svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
@@ -127,13 +127,13 @@
   .count input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
   .count output { min-width: 2ch; color: var(--paper); font-variant-numeric: tabular-nums; text-align: right; }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
-  .finger[data-tip="8"]  { left: calc(30 / 96 * 100%); top: calc((1 + 16) / 146 * 100%); }
-  .finger[data-tip="12"] { left: calc(50 / 96 * 100%); top: calc((-5 + 16) / 146 * 100%); }
-  .finger[data-tip="16"] { left: calc(70 / 96 * 100%); top: calc((3 + 16) / 146 * 100%); }
-  .finger[data-tip="20"] { left: calc(88 / 96 * 100%); top: calc((19 + 16) / 146 * 100%); }
+  .finger[data-tip="8"]  { left: calc(22.3 / 96 * 100%); top: calc((10.6 + 16) / 146 * 100%); }
+  .finger[data-tip="12"] { left: calc(43.1 / 96 * 100%); top: calc((-0.7 + 16) / 146 * 100%); }
+  .finger[data-tip="16"] { left: calc(65.8 / 96 * 100%); top: calc((6 + 16) / 146 * 100%); }
+  .finger[data-tip="20"] { left: calc(82.3 / 96 * 100%); top: calc((21.8 + 16) / 146 * 100%); }
   .finger input {
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
     box-shadow: 0 0 9px 1px var(--c, transparent);   /* each dot glows in its own color */
     padding: 0;
     border: 1px solid var(--paper-dim);
@@ -193,7 +193,7 @@
         <stop offset="1" style="stop-color: var(--paper); stop-opacity: 0"/>
       </linearGradient>
       <filter id="hand-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>
-      <path id="hand-shape" d="M44 127 C42 115 34 104 26 95 C20 88 12 78 7 70 C4 65 9 60 14 63 C20 67 25 74 31 80 L32 26 C32 15 42 15 42 26 L43 60 L46 20 C46 9 56 9 56 20 L56 60 L60 28 C61 18 71 19 70 29 L68 64 L74 42 C76 33 85 35 83 44 L78 78 C77 92 72 104 70 127 Z"/>
+      <path id="hand-shape" d="M31 80 C31 62 73 62 73 80 L70 106 C68 116 66 122 66 131 L40 131 C40 122 36 116 34 106 Z M41.9 73.0 L22.5 24.8 A5.2 5.2 0 0 1 32.1 20.9 L51.6 69.1 Z M45.4 70.6 L39.3 12.9 A5.2 5.2 0 0 1 49.6 11.9 L55.7 69.5 Z M49.3 69.3 L58.3 18.1 A5.2 5.2 0 0 1 68.6 19.9 L59.6 71.1 Z M53.5 69.1 L71.9 31.4 A5.2 5.2 0 0 1 81.2 35.9 L62.8 73.7 Z M34.1 97.7 L9.4 89.7 A6 6 0 0 1 13.1 78.3 L37.9 86.3 Z"/>
     </defs>
     <use class="halo" href="#hand-shape"/>
     <use class="hand" href="#hand-shape"/>
