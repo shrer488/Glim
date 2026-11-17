@@ -124,8 +124,8 @@
   /* A soft, glowing hand: brightest at the fingertips, fading out toward the wrist. */
   .picker .hand { fill: url(#hand-fade); }
   .picker .halo { fill: url(#hand-fade); filter: url(#hand-blur); opacity: 0.75; }
-  /* The moth slider sits on its own in the bottom-left corner: "Moths" and the count on top, a
-     hair-thin line below, and a small handle with the same soft cream glow as the hand. */
+  /* The moth slider sits on its own in the bottom-left corner: the moth icon and count on top,
+     a hair-thin line below, and a small hollow cream ring as the handle. */
   .count {
     position: fixed;
     left: max(20px, env(safe-area-inset-left, 0px));
@@ -161,21 +161,21 @@
   .count input::-moz-range-track { height: 1px; background: var(--paper-dim); }
   .count input::-webkit-slider-thumb {
     -webkit-appearance: none;
+    box-sizing: border-box;
     width: 13px;
     height: 13px;
     margin-top: -6px;
-    border: 0;
+    border: 1.5px solid var(--paper);
     border-radius: 50%;
-    background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.65) 55%, rgba(239, 231, 214, 0.25));
-    box-shadow: 0 0 8px 2px rgba(239, 231, 214, 0.35);
+    background: #000;   /* hollow: the background shows through, so only the cream ring reads */
   }
   .count input::-moz-range-thumb {
+    box-sizing: border-box;
     width: 13px;
     height: 13px;
-    border: 0;
+    border: 1.5px solid var(--paper);
     border-radius: 50%;
-    background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.65) 55%, rgba(239, 231, 214, 0.25));
-    box-shadow: 0 0 8px 2px rgba(239, 231, 214, 0.35);
+    background: #000;
   }
   .finger { position: absolute; transform: translate(-50%, -50%); line-height: 0; cursor: pointer; }
   .finger[data-tip="8"]  { left: 27.8%; top: 6.8%; }
