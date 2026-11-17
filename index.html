@@ -547,32 +547,30 @@ function scatter(p) {
 /* ---------- Strings of light ---------- */
 
 const ROPE_POINTS = 18;
-const GRAVITY = 1500;       // px per second squared, pulling every string down
-const ROPE_DAMPING = 0.985; // how quickly a swinging string settles
+const GRAVITY = 600;        // px per second squared; light, so a taut band barely droops
+const ROPE_DAMPING = 0.992; // little friction, so a band keeps wobbling for a moment after a jolt
+const STIFFNESS = 0.3;      // how hard each piece pulls back toward its natural length
+const STIFF_PASSES = 6;
 
-// A string pinned at both ends. It starts with a little slack; pulling the ends further apart than its
-// length lets out more string, so it is never stretched, and bringing them back together leaves it slack.
-function makeRope(a, b, slack) {
-  const len = Math.hypot(b.x - a.x, b.y - a.y) * slack + 1;
+// A rubber band held at both ends. Its natural length is a little shorter than the gap it starts in,
+// so it is always under some tension: it stretches as the fingers pull apart and contracts as they close.
+function makeRope(a, b, restFactor) {
+  const gap = Math.hypot(b.x - a.x, b.y - a.y);
+  const rest = Math.max(gap * restFactor, Math.min(W, H) * 0.12);
   const pts = Array.from({ length: ROPE_POINTS }, (_, i) => {
     const t = i / (ROPE_POINTS - 1);
     const x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
     return { x, y, px: x, py: y };
   });
-  return { pts, len };
+  return { pts, rest, stretch: 1 };
 }
 
 function stepRope(rope, a, b, dt) {
   const n = ROPE_POINTS, pts = rope.pts;
-  const gap = Math.hypot(b.x - a.x, b.y - a.y);
-  rope.len = Math.max(rope.len, gap);
-  // Extra slack reels back in gently, so a string never stays hanging in a deep loop.
-  const most = gap * 1.35 + 30;
-  if (rope.len > most) rope.len += (most - rope.len) * clamp(dt * 1.2, 0, 1);
-  const seg = rope.len / (n - 1);
+  const seg = rope.rest / (n - 1);
   const steps = 2, h = dt / steps;
   for (let s = 0; s < steps; s++) {
-    // Verlet: each point keeps its momentum and falls under gravity.
+    // Verlet: each point keeps its momentum and falls a little under gravity.
     for (let i = 1; i < n - 1; i++) {
       const p = pts[i];
       const vx = (p.x - p.px) * ROPE_DAMPING, vy = (p.y - p.py) * ROPE_DAMPING;
@@ -583,12 +581,13 @@ function stepRope(rope, a, b, dt) {
     // The ends are held by the fingertips.
     Object.assign(pts[0], { x: a.x, y: a.y, px: a.x, py: a.y });
     Object.assign(pts[n - 1], { x: b.x, y: b.y, px: b.x, py: b.y });
-    // Keep neighbouring points one segment apart, so the string cannot stretch.
-    for (let k = 0; k < 12; k++) {
+    // Soft springs between neighbouring points: they only partly correct each pass, which is what
+    // makes the band stretch and bounce instead of behaving like a fixed-length string.
+    for (let k = 0; k < STIFF_PASSES; k++) {
       for (let i = 0; i < n - 1; i++) {
         const p = pts[i], q = pts[i + 1];
         const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy) || 1e-6;
-        const off = (d - seg) / d;
+        const off = (d - seg) / d * STIFFNESS;
         const wp = i === 0 ? 0 : i + 1 === n - 1 ? 1 : 0.5;
         const wq = i === 0 ? 1 : i + 1 === n - 1 ? 0 : 0.5;
         p.x += dx * off * wp; p.y += dy * off * wp;
@@ -596,6 +595,9 @@ function stepRope(rope, a, b, dt) {
       }
     }
   }
+  let total = 0;
+  for (let i = 1; i < n; i++) total += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+  rope.stretch = total / rope.rest;
 }
 
 const ropeMid = rope => rope.pts[ROPE_POINTS >> 1];
@@ -640,7 +642,7 @@ function updatePresses(now, dt) {
     p.lamp += (goal - p.lamp) * clamp(dt * 10, 0, 1);
 
     if (p.lit || p.lamp >= 0.01) {
-      p.rope ??= makeRope(p.a, p.b, 1.12);
+      p.rope ??= makeRope(p.a, p.b, 0.85);
       stepRope(p.rope, p.a, p.b, dt);
       // The light, and so the moths, centre on the lowest part of the string.
       const m = ropeMid(p.rope);
@@ -653,7 +655,7 @@ function updatePresses(now, dt) {
   if (link) {
     link.lamp += (1 - link.lamp) * clamp(dt * 12, 0, 1);
     const edges = linkEdges();
-    link.ropes ??= edges.map(([a, b]) => makeRope(a, b, 1.08));
+    link.ropes ??= edges.map(([a, b]) => makeRope(a, b, 0.9));
     edges.forEach(([a, b], i) => stepRope(link.ropes[i], a, b, dt));
   }
 }
@@ -852,9 +854,11 @@ function tracePath(pts) {
 // stroke of the whole curve, the bends never show brighter joints.
 const GLOW_PASSES = [[30, 0.03], [18, 0.05], [10, 0.08], [6, 0.13], [3, 0.26]];
 
-function drawString(pts, lamp, f, hex) {
+function drawString(pts, lamp, f, hex, stretch = 1) {
   const [r, g, b] = rgbOf(hex);
-  const core = clamp(Math.min(W, H) * 0.0032, 1.6, 4) * Math.sqrt(lamp) * f;
+  // Like rubber, a band gets thinner as it stretches and thicker as it relaxes.
+  const thin = clamp(1 / Math.sqrt(stretch), 0.5, 1.3);
+  const core = clamp(Math.min(W, H) * 0.0032, 1.6, 4) * Math.sqrt(lamp) * f * thin;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   tracePath(pts);
@@ -883,13 +887,13 @@ function drawBeams(now) {
     ctx.fill();
   }
   for (const p of presses.values()) {
-    if (p.lamp >= 0.01 && p.rope) drawString(p.rope.pts, p.lamp, hum(now, p.seed), colorOf(p));
+    if (p.lamp >= 0.01 && p.rope) drawString(p.rope.pts, p.lamp, hum(now, p.seed), colorOf(p), p.rope.stretch);
   }
   if (link?.ropes) {
     const f = hum(now, link.p.seed);
     const lamp = Math.min(link.p.lamp, link.q.lamp) * link.lamp;
     // The joining strings blend the two hands' colors.
-    for (const rope of link.ropes) drawString(rope.pts, lamp, f, linkColor());
+    for (const rope of link.ropes) drawString(rope.pts, lamp, f, linkColor(), rope.stretch);
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "source-over";

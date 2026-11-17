@@ -2,7 +2,7 @@
 
 **Open it here: https://shrer488.github.io/Glim/**
 
-A hand-tracking light toy for your webcam. Pinch your fingers, pull them apart, and a glowing string of light hangs in the gap, sagging and swinging with gravity. Moths fly in from the dark toward it.
+A hand-tracking light toy for your webcam. Pinch your fingers, pull them apart, and a glowing band of light stretches across the gap like rubber, thinning as you pull and bouncing as you move. Moths fly in from the dark toward it.
 
 ## How to use it
 
