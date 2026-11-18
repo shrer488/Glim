@@ -26,7 +26,8 @@
   video, canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
   #fx { z-index: 2; pointer-events: none; }   /* moths and light draw above the title; drags fall through to the scene */
   .log, .controls, .count { z-index: 3; }
-  video { object-fit: cover; transform: scaleX(-1); filter: grayscale(.75) contrast(1.05); }
+  video { object-fit: cover; transform: scaleX(-1); filter: grayscale(.75) contrast(1.05); opacity: 0; transition: opacity 0.9s ease; }
+  video.shown { opacity: 1; }   /* faded in once the camera has settled (see showVideoWhenSettled) */
   canvas { touch-action: none; cursor: crosshair; }
   .hud { position: fixed; pointer-events: none; display: flex; flex-direction: column; gap: 4px; }
   /* Camera off: a script title in the middle with the intro beneath it.
@@ -1480,11 +1481,28 @@ placeMeter();
 phoneLayout.addEventListener("change", () => { placeCameraButton(); placeMeter(); });
 placeCameraButton();
 
+// Phone cameras often send a few odd-sized, zoomed frames while they start up. Keep the video
+// invisible until its size has held steady for a moment, then fade it in.
+function showVideoWhenSettled() {
+  let last = "", steady = 0;
+  const started = performance.now();
+  const check = () => {
+    if (!stream) return;
+    const size = `${video.videoWidth}x${video.videoHeight}`;
+    steady = video.videoWidth && size === last ? steady + 1 : 0;
+    last = size;
+    if (steady >= 12 || performance.now() - started > 2000) video.classList.add("shown");
+    else requestAnimationFrame(check);
+  };
+  requestAnimationFrame(check);
+}
+
 function stopCamera() {
   personReady = false;
   stream?.getTracks().forEach(t => t.stop());
   stream = null;
   video.srcObject = null;
+  video.classList.remove("shown");
   video.hidden = true;
   document.body.classList.remove("live");
   placeCameraButton();
@@ -1512,12 +1530,17 @@ cameraBtn.addEventListener("click", async () => {
     }
     setStatus("Waiting for camera permission.");
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+      // Ask for a picture shaped like the screen. A wide picture on a tall phone screen gets cropped
+      // hard at the sides to fill it, which makes your face look zoomed in.
+      video: innerHeight > innerWidth
+        ? { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: "user" }
+        : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
       audio: false,
     });
     video.srcObject = stream;
     video.hidden = false;
     await video.play();
+    showVideoWhenSettled();
     document.body.classList.add("live");
     placeCameraButton();
     cameraBtn.textContent = "Stop camera";
