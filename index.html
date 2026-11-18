@@ -251,7 +251,7 @@
       display: block;
       z-index: 5;
       left: max(20px, env(safe-area-inset-left, 0px));
-      bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 42px);
+      bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px);
       width: 46px;                     /* 22px of slider plus the padding */
       height: 138px;                   /* 110px of slider plus the padding */
       padding: 14px 12px;
@@ -264,7 +264,8 @@
     .arc input::-moz-range-thumb { width: 13px; }
     .arc-line { stroke: rgba(0, 0, 0, 0.45); }
     .arc-thumb { fill: #000; stroke: #000; }
-    .picker { width: 54px; height: 66px; }
+    .picker { width: 68px; height: 84px; }
+    .finger input { width: 10px; height: 9px; }   /* a little smaller so neighboring dots don't touch */
     .blurb #camera { position: static; transform: none; margin-top: 6px; }
   }
   @media (max-width: 640px) {
@@ -302,7 +303,8 @@
     cursor: pointer;
   }
   .meter-btn .count-tag { position: static; transform: none !important; }
-  .meter-btn .moth-icon { width: 34px; height: 24px; display: block; transition: filter 0.3s ease; }
+  .meter-btn .moth-icon { width: 51px; height: 36px; display: block;   /* about 25% smaller than the phone hand */
+    transition: filter 0.3s ease; }
   .meter-btn .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
   body.meter-open .meter-btn .moth-icon { filter: drop-shadow(0 0 6px rgba(255, 246, 228, 0.7)); }
   .help {
