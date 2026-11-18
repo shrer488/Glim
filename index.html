@@ -238,12 +238,17 @@
   }
   @media (prefers-reduced-motion: reduce) { .finger input { animation: none; } }
   @media (max-width: 640px) {
-    /* Phones: the top corners hold the title and guide once the camera is on, so the status moves
-       to the bottom center, just above the camera button, with the slider and hand above it. */
-    .log { top: auto; bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px); max-width: calc(100vw - 40px); }
-    .count { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
-    .controls { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
-    .arc { width: 110px; }
+    /* Phones: the status stays at the top center, and until the camera is on the camera button sits
+       under the intro (the page moves it there). The moth meter stands upright in the bottom-left
+       corner, as tall as the hand opposite it: the slider is turned a quarter turn so its low end is
+       at the bottom, and the moth is turned back upright beside the ring. */
+    .log { max-width: calc(100vw - 40px); }
+    .count { width: 64px; height: 86px; }
+    .arc { position: absolute; left: 0; top: 86px; width: 86px; margin: 0; transform: rotate(-90deg); transform-origin: 0 0; }
+    .arc input::-webkit-slider-thumb { width: 13px; }
+    .arc input::-moz-range-thumb { width: 13px; }
+    .count .moth-icon { transform: rotate(90deg); }
+    .blurb #camera { position: static; transform: none; margin-top: 6px; }
   }
   @media (max-width: 640px) {
     /* Phones: no room beside the title, so the guide starts just under it. */
@@ -450,7 +455,11 @@ const moths = Array.from({ length: mothCount }, (_, i) => makeMoth(i, false));
 
 const countInput = document.getElementById("moth-count");
 const countTag = document.querySelector(".count-tag");
-const THUMB = 42;   // the handle's travel inset: the moth icon's width, also set on the native handle in the styles
+// On phones the slider stands upright (see the styles) and the moth sits beside the ring instead of above it.
+const phoneLayout = matchMedia("(max-width: 640px)");
+// The handle's travel inset: the moth icon's width when it rides above the ring, or the ring's own width
+// when the slider is upright. Both match the native handle width set in the styles.
+const thumbSize = () => phoneLayout.matches ? 13 : 42;
 
 const arcBox = document.querySelector(".arc");
 const arcSvg = arcBox.querySelector(":scope > svg");
@@ -462,7 +471,7 @@ const ARC_H = 22, ARC_BASE = 11, ARC_LIFT = 0;    // a straight line; raise ARC_
 // travels from half a moth in from each end, matching where the invisible slider puts its own
 // handle, so the pointer, the ring and the moth always line up.
 function placeCountTag() {
-  const w = arcBox.getBoundingClientRect().width;
+  const w = arcBox.offsetWidth, THUMB = thumbSize(), upright = phoneLayout.matches;   // offset sizes ignore the quarter turn
   const cy = ARC_BASE - ARC_LIFT;
   arcSvg.setAttribute("viewBox", `0 0 ${w} ${ARC_H}`);
   // The line stops half a moth in from each end, so the ring never runs past where the moth can follow.
@@ -473,8 +482,8 @@ function placeCountTag() {
   const y = (1 - u) ** 2 * ARC_BASE + 2 * (1 - u) * u * cy + u * u * ARC_BASE;
   arcThumb.setAttribute("cx", x);
   arcThumb.setAttribute("cy", y);
-  const tag = countTag.getBoundingClientRect();
-  countTag.style.transform = `translate(${x - tag.width / 2}px, ${y - tag.height - 8}px)`;
+  const tw = countTag.offsetWidth, th = countTag.offsetHeight;
+  countTag.style.transform = `translate(${x - tw / 2}px, ${upright ? y + 9 : y - th - 8}px)`;
 }
 addEventListener("resize", placeCountTag);
 document.fonts?.ready.then(placeCountTag);
@@ -498,10 +507,11 @@ countTag.addEventListener("pointerdown", e => {
   e.preventDefault();
   countTag.setPointerCapture(e.pointerId);
   countTag.classList.add("dragging");
-  const startX = e.clientX, startCount = mothCount;
-  const travel = arcBox.getBoundingClientRect().width - THUMB;
+  const startX = e.clientX, startY = e.clientY, startCount = mothCount;
+  const travel = arcBox.offsetWidth - thumbSize();
   const move = ev => {
-    const n = Math.round(startCount + (ev.clientX - startX) / travel * (MOTH_MAX - MOTH_MIN));
+    const along = phoneLayout.matches ? startY - ev.clientY : ev.clientX - startX;   // upright: up is more
+    const n = Math.round(startCount + along / travel * (MOTH_MAX - MOTH_MIN));
     setMothCount(clamp(n, MOTH_MIN, MOTH_MAX));
   };
   const end = () => {
@@ -1307,6 +1317,15 @@ async function loadSegmenter() {
 }
 
 const blurb = document.querySelector(".blurb"), logBox = document.querySelector(".log"), fxCanvasEl = document.getElementById("fx");
+const header = document.querySelector(".top");
+// On phones, until the camera is on, the camera button sits under the intro; otherwise at the bottom.
+function placeCameraButton() {
+  if (phoneLayout.matches && !document.body.classList.contains("live")) blurb.append(cameraBtn);
+  else header.append(cameraBtn);
+}
+phoneLayout.addEventListener("change", () => { placeCameraButton(); placeCountTag(); });
+placeCameraButton();
+
 function stopCamera() {
   personReady = false;
   stream?.getTracks().forEach(t => t.stop());
@@ -1315,8 +1334,9 @@ function stopCamera() {
   video.hidden = true;
   document.body.classList.remove("live");
   fxCanvasEl.after(logBox);                  // back to the top center
+  placeCameraButton();
   cameraBtn.textContent = "Start camera";
-  setStatus("Camera off. Press and drag anywhere to try it with your mouse.");
+  setStatus(IDLE_TEXT);
 }
 
 cameraBtn.addEventListener("click", async () => {
@@ -1347,6 +1367,7 @@ cameraBtn.addEventListener("click", async () => {
     await video.play();
     document.body.classList.add("live");
     blurb.append(logBox);                      // the status reads under the gesture guide while the camera is on
+    placeCameraButton();
     cameraBtn.textContent = "Stop camera";
   } catch (err) {
     console.error(err);
@@ -1371,7 +1392,11 @@ function trackHands(now) {
   })), now);
 }
 
-const IDLE_TEXT = "Camera off. Press and drag anywhere to try it with your mouse.";
+// Touch screens get finger wording; a mouse gets mouse wording.
+const IDLE_TEXT = matchMedia("(pointer: coarse)").matches
+  ? "Camera off. Touch and drag anywhere to try it with your finger."
+  : "Camera off. Press and drag anywhere to try it with your mouse.";
+setStatus(IDLE_TEXT);
 const HINTS = {
   armed: "Now pull your fingers apart.",
   litHand: "Light on. Pinch another finger to change color, or make a fist to stop.",
