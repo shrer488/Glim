@@ -241,30 +241,13 @@
   @media (max-width: 640px) {
     /* Phones: the status stays at the top center, and until the camera is on the camera button sits
        under the intro (the page moves it there). The bottom-left corner holds just the moth icon (the
-       page moves it into its own button); tapping it opens the moth meter as a small cream panel
-       above it, an upright slider (turned a quarter turn, low end at the bottom) with a filled ring
-       as the handle. The finger color hand is smaller. */
+       page moves it into its own button); tapping it opens the moth meter: a tall pill like a phone's
+       volume control, filled with cream from the bottom up to the moth count. Drag anywhere on it.
+       The finger color hand is smaller. */
     .log { max-width: calc(100vw - 40px); }
     body .meter-btn { display: block; }   /* beats the hidden default below */
     .count { display: none; }
-    body.meter-open .count {
-      display: block;
-      z-index: 5;
-      left: calc(max(20px, env(safe-area-inset-left, 0px)) + 6px);   /* centered over the 58px moth */
-      bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 74px);   /* just above the moth button */
-      width: 46px;                     /* 22px of slider plus the padding */
-      height: 166px;                   /* the count on top, then 110px of slider, plus the padding */
-      padding: 36px 12px 20px;
-      border-radius: 999px;            /* a tall pill, like the buttons */
-      background: var(--paper);
-      box-shadow: 0 0 24px rgba(255, 244, 222, 0.22);
-    }
-    body .meter-num { display: block; position: absolute; left: 0; right: 0; top: 14px; text-align: center; font: 600 14px/1 var(--text); color: #000; font-variant-numeric: tabular-nums; }
-    .arc { position: absolute; left: 12px; top: 146px; width: 110px; margin: 0; transform: rotate(-90deg); transform-origin: 0 0; }
-    .arc input::-webkit-slider-thumb { width: 13px; }
-    .arc input::-moz-range-thumb { width: 13px; }
-    .arc-line { stroke: rgba(0, 0, 0, 0.45); }
-    .arc-thumb { fill: #000; stroke: #000; }
+    body.meter-open .vol { display: block; }
     .picker { width: 68px; height: 84px; }
     .finger input { width: 10px; height: 9px; }   /* a little smaller so neighboring dots don't touch */
     .blurb #camera { position: static; transform: none; margin-top: 6px; }
@@ -291,7 +274,38 @@
     body.live.help-open .how { color: #1c1a16; }
     body.help-open .top { z-index: 5; }   /* the open guide sits above the status line */
   }
-  .meter-num { display: none; }
+  /* The phone moth meter (see the phone styles): a pill that fills from the bottom. */
+  .vol {
+    display: none;
+    position: fixed;
+    z-index: 5;
+    left: calc(max(20px, env(safe-area-inset-left, 0px)) + 1px);   /* centered over the 58px moth */
+    bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 74px);   /* just above the moth button */
+    width: 56px;
+    height: 168px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(70, 66, 60, 0.55);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: inset 0 0 0 0.5px rgba(239, 231, 214, 0.35), 0 0 24px rgba(255, 244, 222, 0.12);
+    touch-action: none;
+    cursor: ns-resize;
+  }
+  .vol-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--paper); }
+  .vol-num {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    text-align: center;
+    font: 600 15px/1 var(--text);
+    font-variant-numeric: tabular-nums;
+    color: var(--paper);
+    pointer-events: none;
+  }
+  .vol.full-num .vol-num { color: #000; }   /* the number sits on the cream once the fill reaches it */
+  .vol:focus-visible { outline: 1.5px solid var(--paper); outline-offset: 3px; }
   /* The moth icon as its own button (phones only); it opens the moth meter. */
   .meter-btn {
     display: none;
@@ -347,7 +361,7 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> <span id="moth-word">moths</span> at the lamp</span>
 </div>
-<label class="count"><span class="sr-only">Moths</span><span class="meter-num" aria-hidden="true"></span><span class="arc"><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
+<label class="count"><span class="sr-only">Moths</span><span class="arc"><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
     <defs>
       <linearGradient id="moth-fade" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="641">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
@@ -361,6 +375,7 @@
     <use class="shape" href="#moth-shape"/>
   </svg></span></span><svg aria-hidden="true"><path class="arc-line"/><circle class="arc-thumb" r="4"/></svg><input type="range" id="moth-count" min="1" max="30" step="1" value="4"></span></label>
 <button id="meter-btn" class="meter-btn" type="button" aria-label="Number of moths" aria-expanded="false"></button>
+<div class="vol" role="slider" tabindex="0" aria-label="Moths" aria-valuemin="1" aria-valuemax="30"><div class="vol-fill"></div><span class="vol-num" aria-hidden="true"></span></div>
 <div class="controls">
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="99 29 423 517" aria-hidden="true">
@@ -536,12 +551,42 @@ const moths = Array.from({ length: mothCount }, (_, i) => makeMoth(i, false));
 
 const countInput = document.getElementById("moth-count");
 const countTag = document.querySelector(".count-tag");
-const meterNum = document.querySelector(".meter-num");   // the count shown in the phone meter popup
-// On phones the slider stands upright (see the styles) and the moth sits beside the ring instead of above it.
+
+// The phone moth meter: fills from the bottom up to the count. Like a phone's volume control, a drag
+// anywhere on it moves the value by how far the finger travels, so it never jumps under your finger.
+const vol = document.querySelector(".vol"), volFill = vol.querySelector(".vol-fill"), volNum = vol.querySelector(".vol-num");
+function updateVol() {
+  const t = (mothCount - MOTH_MIN) / (MOTH_MAX - MOTH_MIN);
+  const fill = 0.08 + 0.92 * t;   // a sliver stays lit even at the lowest count
+  volFill.style.height = `${fill * 100}%`;
+  volNum.textContent = mothCount;
+  vol.classList.toggle("full-num", fill > 0.24);
+  vol.setAttribute("aria-valuenow", mothCount);
+  vol.setAttribute("aria-valuetext", `${mothCount} moths`);
+}
+vol.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  vol.setPointerCapture(e.pointerId);
+  const startY = e.clientY, startCount = mothCount, travel = vol.offsetHeight * 0.92;
+  const move = ev => setMothCount(clamp(Math.round(startCount + (startY - ev.clientY) / travel * (MOTH_MAX - MOTH_MIN)), MOTH_MIN, MOTH_MAX));
+  const end = () => {
+    vol.removeEventListener("pointermove", move);
+    vol.removeEventListener("pointerup", end);
+    vol.removeEventListener("pointercancel", end);
+  };
+  vol.addEventListener("pointermove", move);
+  vol.addEventListener("pointerup", end);
+  vol.addEventListener("pointercancel", end);
+});
+vol.addEventListener("keydown", e => {
+  const step = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 5, PageDown: -5 }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  setMothCount(clamp(mothCount + step, MOTH_MIN, MOTH_MAX));
+});
+// On phones the moth icon becomes a button that opens a volume-style meter instead of this slider.
 const phoneLayout = matchMedia("(max-width: 640px)");
-// The handle's travel inset: the moth icon's width when it rides above the ring, or the ring's own width
-// when the slider is upright. Both match the native handle width set in the styles.
-const thumbSize = () => phoneLayout.matches ? 13 : 42;
+const THUMB = 42;   // the handle's travel inset: the moth icon's width, also set on the native handle in the styles
 
 const arcBox = document.querySelector(".arc");
 const arcSvg = arcBox.querySelector(":scope > svg");
@@ -553,8 +598,8 @@ const ARC_H = 22, ARC_BASE = 11, ARC_LIFT = 0;    // a straight line; raise ARC_
 // travels from half a moth in from each end, matching where the invisible slider puts its own
 // handle, so the pointer, the ring and the moth always line up.
 function placeCountTag() {
-  const w = arcBox.offsetWidth, THUMB = thumbSize(), upright = phoneLayout.matches;   // offset sizes ignore the quarter turn
-  if (!w) return;   // the meter panel is closed; it's drawn again when it opens
+  const w = arcBox.offsetWidth;
+  if (!w) return;   // hidden (phones); it's drawn again when it shows
   const cy = ARC_BASE - ARC_LIFT;
   arcSvg.setAttribute("viewBox", `0 0 ${w} ${ARC_H}`);
   // The line stops half a moth in from each end, so the ring never runs past where the moth can follow.
@@ -565,7 +610,6 @@ function placeCountTag() {
   const y = (1 - u) ** 2 * ARC_BASE + 2 * (1 - u) * u * cy + u * u * ARC_BASE;
   arcThumb.setAttribute("cx", x);
   arcThumb.setAttribute("cy", y);
-  if (upright) return;   // on phones the moth lives in its own button, not on the slider
   const tw = countTag.offsetWidth, th = countTag.offsetHeight;
   countTag.style.transform = `translate(${x - tw / 2}px, ${y - th - 8}px)`;
 }
@@ -580,7 +624,7 @@ function setMothCount(n) {
   countInput.value = mothCount;
   countInput.setAttribute("aria-valuetext", `${mothCount} moths`);
   document.getElementById("total").textContent = mothCount;
-  meterNum.textContent = mothCount;
+  updateVol();
   placeCountTag();
   document.getElementById("moth-word").textContent = mothCount === 1 ? "moth" : "moths";
   try { localStorage.setItem(COUNT_KEY, String(mothCount)); } catch {}
@@ -593,11 +637,10 @@ countTag.addEventListener("pointerdown", e => {
   e.preventDefault();
   countTag.setPointerCapture(e.pointerId);
   countTag.classList.add("dragging");
-  const startX = e.clientX, startY = e.clientY, startCount = mothCount;
-  const travel = arcBox.offsetWidth - thumbSize();
+  const startX = e.clientX, startCount = mothCount;
+  const travel = arcBox.offsetWidth - THUMB;
   const move = ev => {
-    const along = phoneLayout.matches ? startY - ev.clientY : ev.clientX - startX;   // upright: up is more
-    const n = Math.round(startCount + along / travel * (MOTH_MAX - MOTH_MIN));
+    const n = Math.round(startCount + (ev.clientX - startX) / travel * (MOTH_MAX - MOTH_MIN));
     setMothCount(clamp(n, MOTH_MIN, MOTH_MAX));
   };
   const end = () => {
@@ -1429,7 +1472,7 @@ helpBtn.addEventListener("click", () => {
 });
 addEventListener("pointerdown", e => { if (!helpBtn.contains(e.target) && !blurb.contains(e.target)) setHelp(false); });
 // Phones: the moth icon moves into its own button, which opens the meter as a small panel.
-const meterBtn = document.getElementById("meter-btn"), meterPanel = document.querySelector(".count");
+const meterBtn = document.getElementById("meter-btn"), meterPanel = vol;
 function setMeter(open) {
   document.body.classList.toggle("meter-open", open);
   meterBtn.setAttribute("aria-expanded", open);
