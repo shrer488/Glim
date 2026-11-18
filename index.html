@@ -253,13 +253,14 @@
       left: max(20px, env(safe-area-inset-left, 0px));
       bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px);
       width: 46px;                     /* 22px of slider plus the padding */
-      height: 138px;                   /* 110px of slider plus the padding */
-      padding: 14px 12px;
-      border-radius: 14px;
+      height: 166px;                   /* the count on top, then 110px of slider, plus the padding */
+      padding: 36px 12px 20px;
+      border-radius: 999px;            /* a tall pill, like the buttons */
       background: var(--paper);
       box-shadow: 0 0 24px rgba(255, 244, 222, 0.22);
     }
-    .arc { position: absolute; left: 12px; top: 124px; width: 110px; margin: 0; transform: rotate(-90deg); transform-origin: 0 0; }
+    body .meter-num { display: block; position: absolute; left: 0; right: 0; top: 14px; text-align: center; font: 600 14px/1 var(--text); color: #000; font-variant-numeric: tabular-nums; }
+    .arc { position: absolute; left: 12px; top: 146px; width: 110px; margin: 0; transform: rotate(-90deg); transform-origin: 0 0; }
     .arc input::-webkit-slider-thumb { width: 13px; }
     .arc input::-moz-range-thumb { width: 13px; }
     .arc-line { stroke: rgba(0, 0, 0, 0.45); }
@@ -290,6 +291,7 @@
     body.live.help-open .how { color: #1c1a16; }
     body.help-open .top { z-index: 5; }   /* the open guide sits above the status line */
   }
+  .meter-num { display: none; }
   /* The moth icon as its own button (phones only); it opens the moth meter. */
   .meter-btn {
     display: none;
@@ -347,7 +349,7 @@
   <span id="status" aria-live="polite">Camera off. Press and drag anywhere to try it with your mouse.</span>
   <span><b id="count">0</b> of <span id="total">0</span> <span id="moth-word">moths</span> at the lamp</span>
 </div>
-<label class="count"><span class="sr-only">Moths</span><span class="arc"><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
+<label class="count"><span class="sr-only">Moths</span><span class="meter-num" aria-hidden="true"></span><span class="arc"><span class="count-tag"><span class="moth-icon" aria-hidden="true"><svg viewBox="8 3 901 638">
     <defs>
       <linearGradient id="moth-fade" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="641">
         <stop offset="0" style="stop-color: var(--paper); stop-opacity: 0.95"/>
@@ -536,6 +538,7 @@ const moths = Array.from({ length: mothCount }, (_, i) => makeMoth(i, false));
 
 const countInput = document.getElementById("moth-count");
 const countTag = document.querySelector(".count-tag");
+const meterNum = document.querySelector(".meter-num");   // the count shown in the phone meter popup
 // On phones the slider stands upright (see the styles) and the moth sits beside the ring instead of above it.
 const phoneLayout = matchMedia("(max-width: 640px)");
 // The handle's travel inset: the moth icon's width when it rides above the ring, or the ring's own width
@@ -579,6 +582,7 @@ function setMothCount(n) {
   countInput.value = mothCount;
   countInput.setAttribute("aria-valuetext", `${mothCount} moths`);
   document.getElementById("total").textContent = mothCount;
+  meterNum.textContent = mothCount;
   placeCountTag();
   document.getElementById("moth-word").textContent = mothCount === 1 ? "moth" : "moths";
   try { localStorage.setItem(COUNT_KEY, String(mothCount)); } catch {}
