@@ -106,7 +106,7 @@
     background: linear-gradient(180deg, rgba(239, 231, 214, 0.97), rgba(239, 231, 214, 0.72) 70%, rgba(239, 231, 214, 0.55));
     box-shadow: 0 0 14px 2px rgba(239, 231, 214, 0.3);
     color: #000;
-    font: 600 14px/1 var(--text);
+    font: 500 14px/1 var(--text);
     letter-spacing: 0.01em;
     cursor: pointer;
     transition: box-shadow 0.35s ease;
@@ -124,7 +124,7 @@
   #camera[disabled] { opacity: .6; cursor: progress; }
   /* While the camera is on, "Stop camera" is just a cream outline with cream text, and fills in
      solid cream with black text on hover, with the same wide glow. */
-  body.live #camera { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 1.5px var(--paper), 0 0 14px 2px rgba(239, 231, 214, 0.18); }
+  body.live #camera { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 1px var(--paper), 0 0 14px 2px rgba(239, 231, 214, 0.18); }
   body.live #camera:hover, body.live #camera:focus-visible { background: rgb(250, 244, 231); color: #000; box-shadow:
       0 0 10px 2px rgba(255, 249, 236, 0.75), 0 0 34px 10px rgba(255, 246, 228, 0.32),
       0 0 80px 30px rgba(255, 244, 222, 0.14), 0 0 150px 60px rgba(255, 242, 218, 0.06); }
