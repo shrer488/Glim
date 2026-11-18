@@ -913,9 +913,9 @@ function scatter(p) {
 
 const ROPE_POINTS = 18;
 const GRAVITY = 350;        // px per second squared; light, so a taut band barely droops
-// Little friction, so a band keeps wobbling for a moment after a jolt. On phones a bit more, so it
-// bounces about 30% less: after a second it keeps 27% of its motion instead of 38% (two steps a frame).
-const ropeDamping = () => phoneLayout.matches ? 0.989 : 0.992;
+// Little friction, so a band keeps wobbling for a moment after a jolt. On phones much more, so the
+// band settles almost at once: its motion halves in about a fifth of a second (two steps a frame).
+const ropeDamping = () => phoneLayout.matches ? 0.97 : 0.992;
 const STIFFNESS = 0.3;      // how hard each piece pulls back toward its natural length
 const STIFF_PASSES = 6;
 
