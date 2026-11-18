@@ -73,8 +73,10 @@
   }
   body.live .lede { display: none; }
   body.live .title { left: max(20px, env(safe-area-inset-left, 0px)); top: max(14px, env(safe-area-inset-top, 0px)); transform: none; font-size: 64px; line-height: 0.95; }
-  body.live .blurb { position: static; transform: none; }
-  body.live .how { display: block; position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); top: calc(max(14px, env(safe-area-inset-top, 0px)) + 66px); text-align: left; }
+  /* Camera on: the guide sits under the small title, with the status and moth count just below it. */
+  body.live .blurb { left: max(20px, env(safe-area-inset-left, 0px)); top: calc(max(14px, env(safe-area-inset-top, 0px)) + 66px); transform: none; width: auto; max-width: 34ch; align-items: flex-start; text-align: left; gap: 10px; }
+  body.live .how { display: block; }
+  body.live .log { position: static; transform: none; width: auto; max-width: none; align-items: flex-start; text-align: left; font-size: 12px; }
   /* Status and moth count, centered at the top in the same light sans as the intro. */
   .log {
     top: max(20px, env(safe-area-inset-top, 0px));
@@ -218,7 +220,7 @@
   }
   @media (max-width: 480px) {
     body.live .title { font-size: 48px; }
-    body.live .how { top: calc(max(14px, env(safe-area-inset-top, 0px)) + 52px); max-width: 24ch; }
+    body.live .blurb { top: calc(max(14px, env(safe-area-inset-top, 0px)) + 52px); max-width: 24ch; }
   }
 </style>
 </head>
@@ -1239,6 +1241,7 @@ async function loadSegmenter() {
   });
 }
 
+const blurb = document.querySelector(".blurb"), logBox = document.querySelector(".log"), fxCanvasEl = document.getElementById("fx");
 function stopCamera() {
   personReady = false;
   stream?.getTracks().forEach(t => t.stop());
@@ -1246,6 +1249,7 @@ function stopCamera() {
   video.srcObject = null;
   video.hidden = true;
   document.body.classList.remove("live");
+  fxCanvasEl.after(logBox);                  // back to the top center
   cameraBtn.textContent = "Start camera";
   setStatus("Camera off. Press and drag anywhere to try it with your mouse.");
 }
@@ -1277,6 +1281,7 @@ cameraBtn.addEventListener("click", async () => {
     video.hidden = false;
     await video.play();
     document.body.classList.add("live");
+    blurb.append(logBox);                      // the status reads under the gesture guide while the camera is on
     cameraBtn.textContent = "Stop camera";
   } catch (err) {
     console.error(err);
