@@ -95,7 +95,7 @@
   /* Camera on: the guide sits under the small title, with the status and moth count just below it. */
   body.live .blurb { left: max(20px, env(safe-area-inset-left, 0px)); top: max(20px, env(safe-area-inset-top, 0px)); transform: none; width: auto; max-width: 17rem; align-items: flex-start; text-align: left; gap: 10px; }
   body.live .how { display: block; }
-  body.live .log { position: static; transform: none; width: auto; max-width: none; align-items: flex-start; text-align: left; font-size: 12px; }
+  body.live .blurb .log { position: static; transform: none; width: auto; max-width: none; align-items: flex-start; text-align: left; font-size: 12px; }
   /* Status and moth count, centered at the top in the same light sans as the intro. */
   .log {
     top: max(20px, env(safe-area-inset-top, 0px));
@@ -132,7 +132,8 @@
   }
   /* On hover the glow spreads wide. Several soft layers, each fading out completely, keep it a clean
      light rather than a grey haze; the page also treats the hovered button as a light for the moths. */
-  #camera:hover, #camera:focus-visible {
+  /* .hovering is set by the page only for a mouse, so a tap on a phone doesn't leave it lit. */
+  #camera.hovering, #camera:focus-visible {
     background: rgb(250, 244, 231);
     box-shadow:
       0 0 10px 2px rgba(255, 249, 236, 0.75),
@@ -144,7 +145,7 @@
   /* While the camera is on, "Stop camera" is just a cream outline with cream text, and fills in
      solid cream with black text on hover, with the same wide glow. */
   body.live #camera { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 0.5px var(--paper), 0 0 12px 1px rgba(239, 231, 214, 0.1); }
-  body.live #camera:hover, body.live #camera:focus-visible { background: rgb(250, 244, 231); color: #000; box-shadow:
+  body.live #camera.hovering, body.live #camera:focus-visible { background: rgb(250, 244, 231); color: #000; box-shadow:
       0 0 10px 2px rgba(255, 249, 236, 0.75), 0 0 34px 10px rgba(255, 246, 228, 0.32),
       0 0 80px 30px rgba(255, 244, 222, 0.14), 0 0 150px 60px rgba(255, 242, 218, 0.06); }
   #camera:focus-visible { outline: 1.5px solid var(--paper); outline-offset: 4px; }
@@ -251,10 +252,44 @@
     .blurb #camera { position: static; transform: none; margin-top: 6px; }
   }
   @media (max-width: 640px) {
-    /* Phones: no room beside the title, so the guide starts just under it. */
-    body.live .title { font-size: 36px; }
-    body.live .blurb { top: calc(max(20px, env(safe-area-inset-top, 0px)) + 52px); max-width: calc(100vw - 40px); }
+    /* Phones with the camera on: the title in the top-left corner, the status and moth count
+       centered between it and a help button in the top-right corner. The gesture guide opens
+       from the help button as a small panel under it. */
+    body.live .title { left: max(20px, env(safe-area-inset-left, 0px)); transform: none; font-size: 36px; }
+    body.live .log { max-width: calc(100vw - 180px); }
+    body.live .help { display: grid; }
+    body.live .blurb { display: none; }
+    body.live.help-open .blurb {
+      display: flex;
+      left: auto;
+      right: max(20px, env(safe-area-inset-right, 0px));
+      top: calc(max(20px, env(safe-area-inset-top, 0px)) + 44px);
+      max-width: min(17rem, calc(100vw - 40px));
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.78);
+      box-shadow: inset 0 0 0 0.5px rgba(239, 231, 214, 0.45);
+    }
   }
+  .help {
+    display: none;
+    position: fixed;
+    top: max(20px, env(safe-area-inset-top, 0px));
+    right: max(20px, env(safe-area-inset-right, 0px));
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 0.5px var(--paper);
+    color: var(--paper);
+    font: 500 15px/1 var(--text);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  body.help-open .help { background: var(--paper); color: #000; }
 </style>
 </head>
 <body>
@@ -265,9 +300,10 @@
 <header class="top">
   <div class="blurb">
     <p class="lede">Play with light at your fingertips and watch as curious moths find their way to your glow. Move your hands, change the colors, and see who comes fluttering by.</p>
-    <p class="how">Pinch your thumb with any finger, then pull apart. Each finger makes its own color. Touch fingertips from both hands to join beams into a rectangle. Make a fist to stop.</p>
+    <p class="how" id="how">Pinch your thumb with any finger, then pull apart. Each finger makes its own color. Touch fingertips from both hands to join beams into a rectangle. Make a fist to stop.</p>
   </div>
   <button id="camera" type="button">Start camera</button>
+  <button id="help" class="help" type="button" aria-label="How to play" aria-expanded="false" aria-controls="how">?</button>
 </header>
 <canvas id="fx"></canvas>
 <div class="hud log">
@@ -341,6 +377,7 @@ const countEl = document.getElementById("count");
 // and light the part of the word under it. 100 is the glow layer's padding, set in the styles.
 const titleEl = document.querySelector(".title");
 addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;   // a hover effect: fingers on a phone don't hover
   const r = titleEl.getBoundingClientRect(), pad = 40;
   const over = e.clientX >= r.left - pad && e.clientX <= r.right + pad && e.clientY >= r.top - pad && e.clientY <= r.bottom + pad;
   if (over) {
@@ -360,9 +397,15 @@ function lightButton() {
   const r = cameraBtn.getBoundingClientRect();
   buttonLight = { x: (r.left + r.right) / 2, y: r.top - 20, since: performance.now() };
 }
-cameraBtn.addEventListener("pointerenter", lightButton);
+// Hover only counts for a mouse: on a phone a tap would otherwise leave the button lit.
+cameraBtn.addEventListener("pointerenter", e => {
+  if (e.pointerType !== "mouse") return;
+  cameraBtn.classList.add("hovering");
+  lightButton();
+});
+cameraBtn.addEventListener("pointerleave", () => { cameraBtn.classList.remove("hovering"); buttonLight = null; });
 cameraBtn.addEventListener("focus", () => { if (cameraBtn.matches(":focus-visible")) lightButton(); });
-for (const type of ["pointerleave", "blur"]) cameraBtn.addEventListener(type, () => { buttonLight = null; });
+cameraBtn.addEventListener("blur", () => { if (!cameraBtn.classList.contains("hovering")) buttonLight = null; });
 
 let W = 0, H = 0;
 function resize() {
@@ -1318,11 +1361,26 @@ async function loadSegmenter() {
 
 const blurb = document.querySelector(".blurb"), logBox = document.querySelector(".log"), fxCanvasEl = document.getElementById("fx");
 const header = document.querySelector(".top");
-// On phones, until the camera is on, the camera button sits under the intro; otherwise at the bottom.
+// Where the status and camera button sit depends on the screen and whether the camera is on.
+// Status: under the gesture guide on larger screens with the camera on, otherwise top center.
+// Button: under the intro on phones until the camera is on, otherwise bottom center.
 function placeCameraButton() {
-  if (phoneLayout.matches && !document.body.classList.contains("live")) blurb.append(cameraBtn);
-  else header.append(cameraBtn);
+  const live = document.body.classList.contains("live"), phone = phoneLayout.matches;
+  if (phone && !live) blurb.append(cameraBtn);
+  else header.insertBefore(cameraBtn, helpBtn);
+  if (live && !phone) blurb.append(logBox);
+  else fxCanvasEl.after(logBox);
+  if (!live || !phone) setHelp(false);
 }
+
+// The help button (phones, camera on) opens and closes the gesture guide. Tapping anywhere else closes it.
+const helpBtn = document.getElementById("help");
+function setHelp(open) {
+  document.body.classList.toggle("help-open", open);
+  helpBtn.setAttribute("aria-expanded", open);
+}
+helpBtn.addEventListener("click", () => setHelp(!document.body.classList.contains("help-open")));
+addEventListener("pointerdown", e => { if (!helpBtn.contains(e.target) && !blurb.contains(e.target)) setHelp(false); });
 phoneLayout.addEventListener("change", () => { placeCameraButton(); placeCountTag(); });
 placeCameraButton();
 
@@ -1333,7 +1391,6 @@ function stopCamera() {
   video.srcObject = null;
   video.hidden = true;
   document.body.classList.remove("live");
-  fxCanvasEl.after(logBox);                  // back to the top center
   placeCameraButton();
   cameraBtn.textContent = "Start camera";
   setStatus(IDLE_TEXT);
@@ -1366,7 +1423,6 @@ cameraBtn.addEventListener("click", async () => {
     video.hidden = false;
     await video.play();
     document.body.classList.add("live");
-    blurb.append(logBox);                      // the status reads under the gesture guide while the camera is on
     placeCameraButton();
     cameraBtn.textContent = "Stop camera";
   } catch (err) {
