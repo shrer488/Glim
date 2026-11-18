@@ -56,12 +56,22 @@
     text-shadow: 0 0 10px rgba(255, 244, 222, 0.3), 0 0 30px rgba(255, 240, 214, 0.12);   /* a faint glow, like the other cream pieces */
     transition: text-shadow 0.5s ease, color 0.5s ease;
   }
-  /* Pointing at the title lights it up with a soft, wide glow. */
-  .title.lit {
+  /* Pointing at the title lights up just the strokes near the pointer: a bright copy of the word sits
+     on top, masked to a soft circle that follows the pointer (--mx, --my). The padding gives the glow
+     room to spread past the letters without the mask cutting it off. */
+  .title::after {
+    content: "Glim";
+    position: absolute;
+    inset: -100px;
+    padding: 100px;
     color: #fffaf0;
-    text-shadow: 0 0 8px rgba(255, 249, 236, 0.7), 0 0 26px rgba(255, 246, 228, 0.4),
-      0 0 60px rgba(255, 244, 222, 0.22), 0 0 120px rgba(255, 242, 218, 0.1);
+    text-shadow: 0 0 8px rgba(255, 249, 236, 0.75), 0 0 24px rgba(255, 246, 228, 0.4), 0 0 56px rgba(255, 244, 222, 0.18);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    -webkit-mask-image: radial-gradient(circle 0.36em at var(--mx, 50%) var(--my, 50%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+    mask-image: radial-gradient(circle 0.36em at var(--mx, 50%) var(--my, 50%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
   }
+  .title.lit::after { opacity: 1; }
   .blurb {
     position: absolute;
     left: calc(50% - 0.052 * var(--fs));
@@ -322,11 +332,16 @@ const video = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const countEl = document.getElementById("count");
 // The title can't take the pointer itself (drags on it still pull out a beam), so watch the pointer
-// and light the title while it's over the word.
+// and light the part of the word under it. 100 is the glow layer's padding, set in the styles.
 const titleEl = document.querySelector(".title");
 addEventListener("pointermove", e => {
-  const r = titleEl.getBoundingClientRect();
-  titleEl.classList.toggle("lit", e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+  const r = titleEl.getBoundingClientRect(), pad = 40;
+  const over = e.clientX >= r.left - pad && e.clientX <= r.right + pad && e.clientY >= r.top - pad && e.clientY <= r.bottom + pad;
+  if (over) {
+    titleEl.style.setProperty("--mx", `${e.clientX - r.left + 100}px`);
+    titleEl.style.setProperty("--my", `${e.clientY - r.top + 100}px`);
+  }
+  titleEl.classList.toggle("lit", over);
 }, { passive: true });
 document.documentElement.addEventListener("pointerleave", () => titleEl.classList.remove("lit"));
 
