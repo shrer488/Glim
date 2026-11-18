@@ -913,7 +913,9 @@ function scatter(p) {
 
 const ROPE_POINTS = 18;
 const GRAVITY = 350;        // px per second squared; light, so a taut band barely droops
-const ROPE_DAMPING = 0.992; // little friction, so a band keeps wobbling for a moment after a jolt
+// Little friction, so a band keeps wobbling for a moment after a jolt. On phones a bit more, so it
+// bounces about 30% less: after a second it keeps 27% of its motion instead of 38% (two steps a frame).
+const ropeDamping = () => phoneLayout.matches ? 0.989 : 0.992;
 const STIFFNESS = 0.3;      // how hard each piece pulls back toward its natural length
 const STIFF_PASSES = 6;
 
@@ -937,12 +939,12 @@ function stepRope(rope, a, b, dt) {
   const snug = Math.max(gap * 1.05, Math.min(W, H) * 0.08);
   if (rope.rest > snug) rope.rest += (snug - rope.rest) * clamp(dt * 0.9, 0, 1);
   const seg = rope.rest / (n - 1);
-  const steps = 2, h = dt / steps;
+  const steps = 2, h = dt / steps, damping = ropeDamping();
   for (let s = 0; s < steps; s++) {
     // Verlet: each point keeps its momentum and falls a little under gravity.
     for (let i = 1; i < n - 1; i++) {
       const p = pts[i];
-      const vx = (p.x - p.px) * ROPE_DAMPING, vy = (p.y - p.py) * ROPE_DAMPING;
+      const vx = (p.x - p.px) * damping, vy = (p.y - p.py) * damping;
       p.px = p.x; p.py = p.y;
       p.x += vx;
       p.y += vy + GRAVITY * h * h;
