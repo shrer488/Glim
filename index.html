@@ -241,14 +241,18 @@
   @media (max-width: 640px) {
     /* Phones: the status stays at the top center, and until the camera is on the camera button sits
        under the intro (the page moves it there). The moth meter stands upright in the bottom-left
-       corner, as tall as the hand opposite it: the slider is turned a quarter turn so its low end is
-       at the bottom, and the moth is turned back upright beside the ring. */
+       corner: the slider is turned a quarter turn so its low end is at the bottom, a small moth
+       (turned back upright) sits on top of the line, and the filled ring is the handle. The finger
+       color hand is smaller. */
     .log { max-width: calc(100vw - 40px); }
     .count { width: 64px; height: 86px; }
     .arc { position: absolute; left: 0; top: 86px; width: 86px; margin: 0; transform: rotate(-90deg); transform-origin: 0 0; }
     .arc input::-webkit-slider-thumb { width: 13px; }
     .arc input::-moz-range-thumb { width: 13px; }
-    .count .moth-icon { transform: rotate(90deg); }
+    .count .moth-icon { width: 28px; height: 20px; transform: rotate(90deg); }   /* small, sitting above the line */
+    .count-tag { pointer-events: none; }   /* the ring is the handle here; the moth is just a label */
+    .arc-thumb { fill: var(--paper); }
+    .picker { width: 54px; height: 66px; }
     .blurb #camera { position: static; transform: none; margin-top: 6px; }
   }
   @media (max-width: 640px) {
@@ -526,7 +530,14 @@ function placeCountTag() {
   arcThumb.setAttribute("cx", x);
   arcThumb.setAttribute("cy", y);
   const tw = countTag.offsetWidth, th = countTag.offsetHeight;
-  countTag.style.transform = `translate(${x - tw / 2}px, ${upright ? y + 9 : y - th - 8}px)`;
+  if (upright) {
+    // Fixed just past the top end of the line. In the slider's own (turned) frame, "past the end" is
+    // along x, and the upright moth's height there is the tag's height.
+    const cx = w - THUMB / 2 + 5 + th / 2;
+    countTag.style.transform = `translate(${cx - tw / 2}px, ${ARC_BASE - th / 2}px)`;
+  } else {
+    countTag.style.transform = `translate(${x - tw / 2}px, ${y - th - 8}px)`;
+  }
 }
 addEventListener("resize", placeCountTag);
 document.fonts?.ready.then(placeCountTag);
