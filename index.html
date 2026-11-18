@@ -249,6 +249,7 @@
     .title { text-shadow: none; }        /* no glow on phones, on the title or the Help button */
     .title::after { display: none; }
     body .help { text-shadow: none; }
+    #camera { background: var(--paper); }   /* solid on phones, not see-through */
     .count { display: none; }
     body.meter-open .vol { display: block; }
     .picker { width: 68px; height: 84px; }
@@ -282,9 +283,9 @@
     display: none;
     position: fixed;
     z-index: 5;
-    left: calc(max(20px, env(safe-area-inset-left, 0px)) + 1px);   /* centered over the 58px moth */
+    left: calc(max(20px, env(safe-area-inset-left, 0px)) + 7px);   /* centered over the 58px moth */
     bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 74px);   /* just above the moth button */
-    width: 56px;
+    width: 44px;
     height: 168px;
     border-radius: 999px;
     overflow: hidden;
@@ -296,18 +297,6 @@
     cursor: ns-resize;
   }
   .vol-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--paper); }
-  .vol-num {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 18px;
-    text-align: center;
-    font: 600 15px/1 var(--text);
-    font-variant-numeric: tabular-nums;
-    color: var(--paper);
-    pointer-events: none;
-  }
-  .vol.full-num .vol-num { color: #000; }   /* the number sits on the cream once the fill reaches it */
   .vol:focus-visible { outline: 1.5px solid var(--paper); outline-offset: 3px; }
   /* The moth icon as its own button (phones only); it opens the moth meter. */
   .meter-btn {
@@ -378,7 +367,7 @@
     <use class="shape" href="#moth-shape"/>
   </svg></span></span><svg aria-hidden="true"><path class="arc-line"/><circle class="arc-thumb" r="4"/></svg><input type="range" id="moth-count" min="1" max="30" step="1" value="4"></span></label>
 <button id="meter-btn" class="meter-btn" type="button" aria-label="Number of moths" aria-expanded="false"></button>
-<div class="vol" role="slider" tabindex="0" aria-label="Moths" aria-valuemin="1" aria-valuemax="30"><div class="vol-fill"></div><span class="vol-num" aria-hidden="true"></span></div>
+<div class="vol" role="slider" tabindex="0" aria-label="Moths" aria-valuemin="1" aria-valuemax="30"><div class="vol-fill"></div></div>
 <div class="controls">
 <div class="picker" role="group" aria-label="Beam color for each finger">
   <svg viewBox="99 29 423 517" aria-hidden="true">
@@ -557,13 +546,11 @@ const countTag = document.querySelector(".count-tag");
 
 // The phone moth meter: fills from the bottom up to the count. Like a phone's volume control, a drag
 // anywhere on it moves the value by how far the finger travels, so it never jumps under your finger.
-const vol = document.querySelector(".vol"), volFill = vol.querySelector(".vol-fill"), volNum = vol.querySelector(".vol-num");
+const vol = document.querySelector(".vol"), volFill = vol.querySelector(".vol-fill");
 function updateVol() {
   const t = (mothCount - MOTH_MIN) / (MOTH_MAX - MOTH_MIN);
   const fill = 0.08 + 0.92 * t;   // a sliver stays lit even at the lowest count
   volFill.style.height = `${fill * 100}%`;
-  volNum.textContent = mothCount;
-  vol.classList.toggle("full-num", fill > 0.24);
   vol.setAttribute("aria-valuenow", mothCount);
   vol.setAttribute("aria-valuetext", `${mothCount} moths`);
 }
