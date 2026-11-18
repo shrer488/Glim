@@ -250,8 +250,8 @@
     body.meter-open .count {
       display: block;
       z-index: 5;
-      left: max(20px, env(safe-area-inset-left, 0px));
-      bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px);
+      left: calc(max(20px, env(safe-area-inset-left, 0px)) + 6px);   /* centered over the 58px moth */
+      bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 74px);   /* just above the moth button */
       width: 46px;                     /* 22px of slider plus the padding */
       height: 166px;                   /* the count on top, then 110px of slider, plus the padding */
       padding: 36px 12px 20px;
@@ -275,7 +275,7 @@
        from the help button as a small panel under it. */
     body.live .title { left: max(20px, env(safe-area-inset-left, 0px)); transform: none; font-size: 36px; }
     body.live .log { max-width: calc(100vw - 180px); }
-    body.live .help { display: grid; }
+    body.live .help { display: block; }
     body.live .blurb { display: none; }
     body.live.help-open .blurb {
       display: flex;
@@ -298,32 +298,30 @@
     position: fixed;
     z-index: 3;
     left: max(14px, env(safe-area-inset-left, 0px));
-    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    /* Centered level with the hand opposite: the hand is 84px tall from 20px up, the moth 41px tall
+       inside 6px of padding. */
+    bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + (84px - 41px) / 2 - 6px);
     padding: 6px;
     border: 0;
     background: none;
     cursor: pointer;
   }
   .meter-btn .count-tag { position: static; transform: none !important; }
-  .meter-btn .moth-icon { width: 51px; height: 36px; display: block;   /* about 25% smaller than the phone hand */
+  .meter-btn .moth-icon { width: 58px; height: 41px; display: block;
     transition: filter 0.3s ease; }
   .meter-btn .moth-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
   body.meter-open .meter-btn .moth-icon { filter: drop-shadow(0 0 6px rgba(255, 246, 228, 0.7)); }
   .help {
     display: none;
     position: fixed;
-    top: max(20px, env(safe-area-inset-top, 0px));
-    right: max(20px, env(safe-area-inset-right, 0px));
-    width: 32px;
-    height: 32px;
-    place-items: center;
-    padding: 0;
+    top: max(14px, env(safe-area-inset-top, 0px));
+    right: max(14px, env(safe-area-inset-right, 0px));
+    padding: 6px;                    /* a bigger tap target; the word itself sits 20px from the edges */
     border: 0;
-    border-radius: 50%;
     background: transparent;
     color: var(--paper);
-    font: 400 38px/1 var(--display);   /* a question mark in the same script as the title, glowing softly */
-    text-shadow: 0 0 8px rgba(255, 246, 228, 0.45), 0 0 20px rgba(255, 242, 218, 0.18);
+    font: 500 14px/1 var(--text);
+    text-shadow: 0 0 8px rgba(255, 246, 228, 0.45), 0 0 20px rgba(255, 242, 218, 0.18);   /* a soft glow */
     pointer-events: auto;
     cursor: pointer;
     transition: text-shadow 0.3s ease;
@@ -342,7 +340,7 @@
     <p class="how" id="how">Pinch your thumb with any finger, then pull apart. Each finger makes its own color. Touch fingertips from both hands to join beams into a rectangle. Make a fist to stop.</p>
   </div>
   <button id="camera" type="button">Start camera</button>
-  <button id="help" class="help" type="button" aria-label="How to play" aria-expanded="false" aria-controls="how">?</button>
+  <button id="help" class="help" type="button" aria-expanded="false" aria-controls="how">Help</button>
 </header>
 <canvas id="fx"></canvas>
 <div class="hud log">
