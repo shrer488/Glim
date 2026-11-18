@@ -174,7 +174,7 @@
     font: 300 14px/1 var(--text);
     color: var(--paper-dim);
   }
-  .arc { position: relative; display: block; width: 120px; height: 22px; margin-top: 30px; }
+  .arc { position: relative; display: block; width: 140px; height: 22px; margin-top: 30px; }
   .arc > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }   /* the drawn arc only, not the moth icon inside the tag */
   .arc-line { fill: none; stroke: var(--paper-dim); stroke-width: 1; }
   .arc-thumb { fill: #000; stroke: var(--paper); stroke-width: 1.5; }   /* hollow: only the cream ring reads */
@@ -191,8 +191,8 @@
     appearance: none;
   }
   /* The invisible native handle matches the drawn one's width, so a click lands on the value under the pointer. */
-  .arc input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 22px; }
-  .arc input::-moz-range-thumb { width: 13px; height: 22px; border: 0; }
+  .arc input::-webkit-slider-thumb { -webkit-appearance: none; width: 42px; height: 22px; }
+  .arc input::-moz-range-thumb { width: 42px; height: 22px; border: 0; }
   /* The moth rides above the ring and is a second handle: drag it and the ring follows. */
   .count-tag { position: absolute; left: 0; top: 0; z-index: 1; display: flex; will-change: transform; cursor: grab; touch-action: none; }
   .count-tag.dragging { cursor: grabbing; }
@@ -242,7 +242,7 @@
     .log { top: auto; bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px); max-width: calc(100vw - 40px); }
     .count { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
     .controls { bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 136px); }
-    .arc { width: 90px; }
+    .arc { width: 110px; }
   }
   @media (max-width: 640px) {
     /* Phones: no room beside the title, so the guide starts just under it. */
@@ -449,7 +449,7 @@ const moths = Array.from({ length: mothCount }, (_, i) => makeMoth(i, false));
 
 const countInput = document.getElementById("moth-count");
 const countTag = document.querySelector(".count-tag");
-const THUMB = 13;   // the handle's width, as set in the styles
+const THUMB = 42;   // the handle's travel inset: the moth icon's width, also set on the native handle in the styles
 
 const arcBox = document.querySelector(".arc");
 const arcSvg = arcBox.querySelector(":scope > svg");
@@ -457,14 +457,15 @@ const arcLine = arcBox.querySelector(".arc-line");
 const arcThumb = arcBox.querySelector(".arc-thumb");
 const ARC_H = 22, ARC_BASE = 11, ARC_LIFT = 0;    // a straight line; raise ARC_LIFT to bow it into an arc
 
-// Draws the arc across the slider's full width and puts the ring and moth where the value sits on it.
-// The ring travels from half a handle in from each end, matching where the invisible slider puts its
-// own handle, so the pointer and the drawn ring always line up; the line itself runs to both edges.
+// Draws the line and puts the ring, with the moth centered above it, where the value sits. The ring
+// travels from half a moth in from each end, matching where the invisible slider puts its own
+// handle, so the pointer, the ring and the moth always line up.
 function placeCountTag() {
   const w = arcBox.getBoundingClientRect().width;
   const cy = ARC_BASE - ARC_LIFT;
   arcSvg.setAttribute("viewBox", `0 0 ${w} ${ARC_H}`);
-  arcLine.setAttribute("d", `M0 ${ARC_BASE} Q${w / 2} ${cy} ${w} ${ARC_BASE}`);
+  // The line stops half a moth in from each end, so the ring never runs past where the moth can follow.
+  arcLine.setAttribute("d", `M${THUMB / 2} ${ARC_BASE} Q${w / 2} ${cy} ${w - THUMB / 2} ${ARC_BASE}`);
   const t = (mothCount - MOTH_MIN) / (MOTH_MAX - MOTH_MIN);
   const x = THUMB / 2 + (w - THUMB) * t;
   const u = x / w;   // position along the full curve, whose x grows evenly from 0 to w
@@ -472,7 +473,7 @@ function placeCountTag() {
   arcThumb.setAttribute("cx", x);
   arcThumb.setAttribute("cy", y);
   const tag = countTag.getBoundingClientRect();
-  countTag.style.transform = `translate(${clamp(x - tag.width / 2, 0, Math.max(0, w - tag.width))}px, ${y - tag.height - 8}px)`;
+  countTag.style.transform = `translate(${x - tag.width / 2}px, ${y - tag.height - 8}px)`;
 }
 addEventListener("resize", placeCountTag);
 document.fonts?.ready.then(placeCountTag);
